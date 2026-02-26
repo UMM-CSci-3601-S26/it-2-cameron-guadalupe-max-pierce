@@ -1,11 +1,8 @@
 export interface InventoryItem {
   _id: string;
-  // name: string;
-  // age: number;
-  // company: string;
-  // email: string;
-  // avatar?: string;
-  //role: UserRole;
+  name: string;
+  type: string;
+  desc: string;
+  location: string;
+  stocked: number;
 }
-
-//export type UserRole = 'admin' | 'editor' | 'viewer';
