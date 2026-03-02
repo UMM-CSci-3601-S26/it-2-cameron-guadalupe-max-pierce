@@ -9,7 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+//import java.util.Map;
 import java.util.Objects;
 //import java.util.regex.Pattern;
 
@@ -21,7 +21,7 @@ import org.mongojack.JacksonMongoCollection;
 
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Sorts;
-import com.mongodb.client.result.DeleteResult;
+//import com.mongodb.client.result.DeleteResult;
 
 import io.javalin.Javalin;
 import io.javalin.http.BadRequestResponse;
@@ -35,7 +35,7 @@ import umm3601.Controller;
  */
 public class InventoryItemController implements Controller {
 
-  private static final String API_INVENTORY= "/api/inventory";
+  private static final String API_INVENTORY = "/api/inventory";
   private static final String API_INVENTORY_BY_ID = "/api/inventory/{id}";
   static final String NAME_KEY = "name";
   static final String TYPE_KEY = "type";
@@ -190,74 +190,74 @@ public class InventoryItemController implements Controller {
    * @param ctx a Javalin HTTP context that provides the user info
    *  in the JSON body of the request
    */
-  public void addNewItem(Context ctx) {
-    /*
-     * The follow chain of statements uses the Javalin validator system
-     * to verify that instance of `User` provided in this context is
-     * a "legal" user. It checks the following things (in order):
-     *    - The user has a value for the name (`usr.name != null`)
-     *    - The user name is not blank (`usr.name.length > 0`)
-     *    - The provided email is valid (matches EMAIL_REGEX)
-     *    - The provided age is > 0
-     *    - The provided age is < REASONABLE_AGE_LIMIT
-     *    - The provided role is valid (one of "admin", "editor", or "viewer")
-     *    - A non-blank company is provided
-     * If any of these checks fail, the Javalin system will throw a
-     * `BadRequestResponse` with an appropriate error message.
-     */
-    //String body = ctx.body();
-    InventoryItem newItem = ctx.bodyValidator(InventoryItem.class)
-      // .check(usr -> usr.name != null && usr.name.length() > 0,
-      //   "User must have a non-empty user name; body was " + body)
-      // .check(usr -> usr.email.matches(EMAIL_REGEX),
-      //   "User must have a legal email; body was " + body)
-      // .check(usr -> usr.age > 0,
-      //   "User's age must be greater than zero; body was " + body)
-      // .check(usr -> usr.age < REASONABLE_AGE_LIMIT,
-      //   "User's age must be less than " + REASONABLE_AGE_LIMIT + "; body was " + body)
-      // .check(usr -> usr.role.matches(ROLE_REGEX),
-      //   "User must have a legal user role; body was " + body)
-      // .check(usr -> usr.company != null && usr.company.length() > 0,
-      //   "User must have a non-empty company name; body was " + body)
-      .get();
+  // public void addNewItem(Context ctx) {
+  //   /*
+  //    * The follow chain of statements uses the Javalin validator system
+  //    * to verify that instance of `User` provided in this context is
+  //    * a "legal" user. It checks the following things (in order):
+  //    *    - The user has a value for the name (`usr.name != null`)
+  //    *    - The user name is not blank (`usr.name.length > 0`)
+  //    *    - The provided email is valid (matches EMAIL_REGEX)
+  //    *    - The provided age is > 0
+  //    *    - The provided age is < REASONABLE_AGE_LIMIT
+  //    *    - The provided role is valid (one of "admin", "editor", or "viewer")
+  //    *    - A non-blank company is provided
+  //    * If any of these checks fail, the Javalin system will throw a
+  //    * `BadRequestResponse` with an appropriate error message.
+  //    */
+  //   //String body = ctx.body();
+  //   InventoryItem newItem = ctx.bodyValidator(InventoryItem.class)
+  //     // .check(usr -> usr.name != null && usr.name.length() > 0,
+  //     //   "User must have a non-empty user name; body was " + body)
+  //     // .check(usr -> usr.email.matches(EMAIL_REGEX),
+  //     //   "User must have a legal email; body was " + body)
+  //     // .check(usr -> usr.age > 0,
+  //     //   "User's age must be greater than zero; body was " + body)
+  //     // .check(usr -> usr.age < REASONABLE_AGE_LIMIT,
+  //     //   "User's age must be less than " + REASONABLE_AGE_LIMIT + "; body was " + body)
+  //     // .check(usr -> usr.role.matches(ROLE_REGEX),
+  //     //   "User must have a legal user role; body was " + body)
+  //     // .check(usr -> usr.company != null && usr.company.length() > 0,
+  //     //   "User must have a non-empty company name; body was " + body)
+  //     .get();
 
-    // Add the new user to the database
-    inventoryCollection.insertOne(newItem);
+  //   // Add the new user to the database
+  //   inventoryCollection.insertOne(newItem);
 
-    // Set the JSON response to be the `_id` of the newly created user.
-    // This gives the client the opportunity to know the ID of the new user,
-    // which it can then use to perform further operations (e.g., a GET request
-    // to get and display the details of the new user).
-    ctx.json(Map.of("id", newItem._id));
-    // 201 (`HttpStatus.CREATED`) is the HTTP code for when we successfully
-    // create a new resource (a user in this case).
-    // See, e.g., https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
-    // for a description of the various response codes.
-    ctx.status(HttpStatus.CREATED);
-  }
+  //   // Set the JSON response to be the `_id` of the newly created user.
+  //   // This gives the client the opportunity to know the ID of the new user,
+  //   // which it can then use to perform further operations (e.g., a GET request
+  //   // to get and display the details of the new user).
+  //   ctx.json(Map.of("id", newItem._id));
+  //   // 201 (`HttpStatus.CREATED`) is the HTTP code for when we successfully
+  //   // create a new resource (a user in this case).
+  //   // See, e.g., https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
+  //   // for a description of the various response codes.
+  //   ctx.status(HttpStatus.CREATED);
+  // }
 
   /**
    * Delete the user specified by the `id` parameter in the request.
    *
    * @param ctx a Javalin HTTP context
    */
-  public void deleteItem(Context ctx) {
-    String id = ctx.pathParam("id");
-    DeleteResult deleteResult = inventoryCollection.deleteOne(eq("_id", new ObjectId(id)));
-    // We should have deleted 1 or 0 users, depending on whether `id` is a valid user ID.
-    if (deleteResult.getDeletedCount() != 1) {
-      ctx.status(HttpStatus.NOT_FOUND);
-      throw new NotFoundResponse(
-        "Was unable to delete ID "
-          + id
-          + "; perhaps illegal ID or an ID for an item not in the system?");
-    }
-    ctx.status(HttpStatus.OK);
-  }
+  // public void deleteItem(Context ctx) {
+  //   String id = ctx.pathParam("id");
+  //   DeleteResult deleteResult = inventoryCollection.deleteOne(eq("_id", new ObjectId(id)));
+  //   // We should have deleted 1 or 0 users, depending on whether `id` is a valid user ID.
+  //   if (deleteResult.getDeletedCount() != 1) {
+  //     ctx.status(HttpStatus.NOT_FOUND);
+  //     throw new NotFoundResponse(
+  //       "Was unable to delete ID "
+  //         + id
+  //         + "; perhaps illegal ID or an ID for an item not in the system?");
+  //   }
+  //   ctx.status(HttpStatus.OK);
+  // }
 
   /**
    * Utility function to generate the md5 hash for a given string
-   *
+   * ...Wtf is this for?
    * @param str the string to generate a md5 for
    */
   public String md5(String str) throws NoSuchAlgorithmException {
