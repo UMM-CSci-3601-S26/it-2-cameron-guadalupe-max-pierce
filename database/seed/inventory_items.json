@@ -7,7 +7,7 @@
     "type": "pencil",
     "desc":"Yellow #2 Ticonderoga pencils, sharpened, comes in packs of 12",
     "location":"Tote #1",
-    "stocked":67
+    "stocked":0
   },
   {
     "_id": {
@@ -57,6 +57,6 @@
     "type": "box",
     "desc":"Plastic pencil box, any color, 8*5 inches, Crayola",
     "location":"Tote #5",
-    "stocked":1
+    "stocked":10
   }
 ]

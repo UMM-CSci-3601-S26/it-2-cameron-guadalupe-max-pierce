@@ -9,7 +9,7 @@ describe('App', () => {
     page.getAppTitle().should('contain', 'Ready4Learning');
   });
 
-  it('The sidenav should open, navigate to "Users" and back to "Home"', () => {
+  it('The sidenav should open, navigate to "Students" and back to "Home"', () => {
     // Before clicking on the button, the sidenav should be hidden
     page.getSidenav()
       .should('be.hidden');
@@ -17,7 +17,7 @@ describe('App', () => {
       .should('be.visible');
 
     page.getSidenavButton().click();
-    page.getNavLink('Users').click();
+    page.getNavLink('Students').click(); //Changed to reflect new name
     cy.url().should('match', /\/users$/);
     page.getSidenav()
       .should('be.hidden');

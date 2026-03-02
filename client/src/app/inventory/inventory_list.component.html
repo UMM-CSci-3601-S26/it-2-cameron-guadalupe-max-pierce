@@ -19,14 +19,14 @@
             <!-- <mat-label>Desc</mat-label> -->
             <mat-select placeholder="Any Type" [(ngModel)]="itemType" data-test="itemDescSelect">
               <mat-option>Any Type</mat-option> <!--No Value, does not display normally w/out placeholder -->
-              <mat-option value="pencils">Pencils</mat-option>
-              <mat-option value="colored_pencils">Colored Pencils</mat-option>
-              <mat-option value="crayons">Crayons</mat-option>
-              <mat-option value="pens">Pens</mat-option>
-              <mat-option value="erasers">Erasers</mat-option>
-              <mat-option value="folders">Folders</mat-option>
-              <mat-option value="sharpeners">Sharpeners</mat-option>
-              <mat-option value="boxes">Boxes</mat-option>
+              <mat-option value="pencil">Pencils</mat-option>
+              <mat-option value="colored_pencil">Colored Pencils</mat-option>
+              <mat-option value="crayon">Crayons</mat-option>
+              <mat-option value="pen">Pens</mat-option>
+              <mat-option value="eraser">Erasers</mat-option>
+              <mat-option value="folder">Folders</mat-option>
+              <mat-option value="sharpener">Sharpeners</mat-option>
+              <mat-option value="box">Boxes</mat-option>
               <mat-option value="other">Other</mat-option>
             </mat-select>
             <mat-hint>Search inventory by type</mat-hint>
@@ -74,6 +74,7 @@
           <mat-nav-list class="item-nav-list">
             <!--<h3 mat-subheader>Stocked Items</h3> -->
             @for (item of filteredItems(); track item._id) {
+              <!-- This is the part that actually sends us to a new URL based on the item's ID -->
             <a mat-list-item [routerLink]="['/inventory', item._id]" class="item-list-item">
               <!-- @if (item.avatar) {
               <img matListItemAvatar [src]="item.avatar" alt="Avatar for {{ item.name }}">

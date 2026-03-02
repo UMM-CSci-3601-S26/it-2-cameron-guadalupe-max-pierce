@@ -1,0 +1,90 @@
+import { Injectable } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { AppComponent } from 'src/app/app.component';
+import { InventoryItem } from '../app/inventory/inventory_item';
+import { InventoryService } from 'src/app/inventory/inventory.service';
+
+/**
+ * A "mock" version of the `InventoryService` that can be used to test components
+ * without having to create an actual service. It needs to be `Injectable` since
+ * that's how services are typically provided to components.
+ */
+@Injectable({
+  providedIn: AppComponent
+})
+export class MockInventoryService implements Pick<InventoryService, 'getItems' | 'filterItems'> {
+  //'getUsers' | 'getUserById' | 'addUser' | 'filterUsers'
+  static testItems: InventoryItem[] = [
+    {
+      _id: 'pencil_id',
+      name: 'Yellow Pencils',
+      type: 'pencil',
+      location: 'Tote #3',
+      stocked: 6,
+      desc: 'yellow Ticonderoga pencils'
+    },
+    {
+      _id: 'eraser_id',
+      name: '2-inch Eraser',
+      type: 'eraser',
+      location: 'Tote #4',
+      stocked: 2,
+      desc: '2-inch rubber eraser'
+    },
+    {
+      _id: 'folder_id',
+      name: 'Red Plastic Folder',
+      type: 'folder',
+      location: 'Tote #2',
+      stocked: 0,
+      desc: 'standard size red plastic folder.'
+    }
+  ];
+
+  // skipcq: JS-0105
+  // It's OK that the `_filters` argument isn't used here, so we'll disable
+  // this warning for just his function.
+  /* eslint-disable @typescript-eslint/no-unused-vars */
+  getItems(_filters: { name?: string; stocked?: number; desc?: string; location?: string; type?: string;}): Observable<InventoryItem[]> {
+    // Our goal here isn't to test (and thus rewrite) the service, so we'll
+    // keep it simple and just return the test users regardless of what
+    // filters are passed in.
+    //
+    // The `of()` function converts a regular object or value into an
+    // `Observable` of that object or value.
+    return of(MockInventoryService.testItems);
+  }
+
+  //Probably unessesary
+  // skipcq: JS-0105
+  // getUserById(id: string): Observable<User> {
+  //   // If the specified ID is for one of the first two test users,
+  //   // return that user, otherwise return `null` so
+  //   // we can test illegal user requests.
+  //   // If you need more, just add those in too.
+  //   if (id === MockUserService.testUsers[0]._id) {
+  //     return of(MockUserService.testUsers[0]);
+  //   } else if (id === MockUserService.testUsers[1]._id) {
+  //     return of(MockUserService.testUsers[1]);
+  //   } else {
+  //     return of(null);
+  //   }
+  // }
+
+  //Todo
+  // addUser(newUser: Partial<User>): Observable<string> {
+  //   // Send post request to add a new user with the user data as the body.
+  //   // `res.id` should be the MongoDB ID of the newly added `User`.
+  //   return of('')
+  // }
+
+  filterItems(items: InventoryItem[], filters: {
+    name?: string;
+    stocked?: number;
+    desc?: string;
+    location?: string;
+    type?: string;
+  }): InventoryItem[] {
+    return []
+  }
+}
