@@ -1,4 +1,4 @@
-import { Component, signal, inject, Signal } from '@angular/core';
+import { Component, signal, inject, computed, Signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -15,6 +15,7 @@ import { RouterLink } from '@angular/router';
 import { InventoryService } from './inventory.service';
 import { InventoryItem } from './inventory_item';
 import { catchError, map, switchMap } from 'rxjs/operators';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { of } from 'rxjs';
 
 @Component({
@@ -30,6 +31,7 @@ import { of } from 'rxjs';
     MatInputModule,
     MatSelectModule,
     MatOptionModule,
+    MatAutocompleteModule,
     MatButtonModule]
 })
 
@@ -37,6 +39,22 @@ export class ModifyItemComponent {
   private inventoryService = inject(InventoryService);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
+
+  typeInput = signal<string>('');
+
+  filteredTypeOptions = computed(() => {
+    const input = (this.typeInput() || '').toLowerCase();
+    if (!input) return this.inventoryService.typeOptions;
+    return this.inventoryService.typeOptions.filter(option =>
+      option.label.toLowerCase().includes(input) || option.value.toLowerCase().includes(input)
+    );
+  });
+
+  displayTypeLabel = (value: string | null): string => {
+    if (!value) return '';
+    const match = this.inventoryService.typeOptions.find(option => option.value === value);
+    return match ? match.label : value;
+  };
 
   error = signal({ help: '', httpResponse: '', message: '' });
   private route = inject(ActivatedRoute);
