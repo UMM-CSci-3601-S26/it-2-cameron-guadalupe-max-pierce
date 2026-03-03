@@ -52,34 +52,24 @@
 
             <mat-form-field>
               <mat-label>Type</mat-label>
-              <mat-select required formControlName="type">
-                <!-- Copied from inventory_list.component, needs to stay consistent! -->
-                <mat-option value="pencil">Pencils</mat-option>
-                <mat-option value="colored_pencil">Colored Pencils</mat-option>
-                <mat-option value="sharpener">Sharpeners</mat-option>
-                <mat-option value="marker">Markers</mat-option>
-                <mat-option value="highlighter">Highlighters</mat-option>
-                <mat-option value="dry_erase_marker">Dry-Erase Markers</mat-option>
-                <mat-option value="crayon">Crayons</mat-option>
-                <mat-option value="pen">Pens</mat-option>
-                <mat-option value="eraser">Erasers</mat-option>
-                <mat-option value="folder">Folders</mat-option>
-                <mat-option value="binder">Binders</mat-option>
-                <mat-option value="notebook">Notebooks</mat-option>
-                <mat-option value="glue">Glue</mat-option>
-                <mat-option value="ruler">Rulers</mat-option>
-                <mat-option value="scissors">Scissors</mat-option>
-                <mat-option value="headphones">Headphones</mat-option>
-                <mat-option value="backpack">Backpacks</mat-option>
-                <mat-option value="box">Boxes</mat-option>
-                <mat-option value="other">Other</mat-option>
-              </mat-select>
+              <input
+                matInput
+                formControlName="type"
+                [matAutocomplete]="typeAuto"
+                (input)="typeInput.set($any($event.target).value)"
+                required
+              >
+              <mat-autocomplete #typeAuto="matAutocomplete" [displayWith]="displayTypeLabel">
+                @for (option of filteredTypeOptions(); track option.value) {
+                  <mat-option [value]="option.value">{{ option.label }}</mat-option>
+                }
+              </mat-autocomplete>
               @if (formControlHasError('type')) {
                 <mat-error data-test="typeError">
                   {{getErrorMessage('type')}}
                 </mat-error>
               }
-            <mat-hint>Type of Item (select Other for miscellaneous items)</mat-hint>
+              <mat-hint>Type of Item (select Other for miscellaneous items)</mat-hint>
             </mat-form-field>
           </div>
 

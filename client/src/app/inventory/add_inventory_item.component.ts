@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -8,20 +8,35 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-//import { UserRole } from './user';
 import { InventoryService } from './inventory.service';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 @Component({
   selector: 'app-add-inventory-item',
   templateUrl: './add_inventory_item.component.html',
   styleUrls: ['./add_inventory_item.component.scss'],
-  imports: [FormsModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatOptionModule, MatButtonModule]
+  imports: [FormsModule, ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatOptionModule, MatButtonModule, MatAutocompleteModule]
 })
 export class AddItemComponent {
   private inventoryService = inject(InventoryService);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
 
+  typeInput = signal<string>('');
+
+  filteredTypeOptions = computed(() => {
+    const input = (this.typeInput() || '').toLowerCase();
+    if (!input) return this.inventoryService.typeOptions;
+    return this.inventoryService.typeOptions.filter(option =>
+      option.label.toLowerCase().includes(input) || option.value.toLowerCase().includes(input)
+    );
+  });
+
+  displayTypeLabel = (value: string | null): string => {
+    if (!value) return '';
+    const match = this.inventoryService.typeOptions.find(option => option.value === value);
+    return match ? match.label : value;
+  };
 
   addInventoryForm = new FormGroup({
     // We allow alphanumeric input and limit the length for name.
@@ -53,12 +68,11 @@ export class AddItemComponent {
 
     type: new FormControl('', Validators.compose([
       Validators.required,
-      //Validators.email,
+      Validators.pattern(this.inventoryService.typeOptions.map(option => option.value).join('|'))
     ])),
 
     location: new FormControl('', Validators.compose([
       Validators.required,
-      //Validators.email,
     ])),
 
   });
@@ -82,7 +96,8 @@ export class AddItemComponent {
     ],
 
     type: [
-      {type: 'required', message: 'Type is required!'}
+      {type: 'required', message: 'Type is required!'},
+      {type: 'pattern', message: 'Type must be selected from the dropdown.'}
     ],
 
     location: [
