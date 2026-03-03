@@ -33,6 +33,7 @@ import umm3601.Controller;
 /**
  * Controller that manages requests for info about users.
  */
+@SuppressWarnings({"MagicNumber"})
 public class InventoryItemController implements Controller {
 
   private static final String API_INVENTORY = "/api/inventory";
