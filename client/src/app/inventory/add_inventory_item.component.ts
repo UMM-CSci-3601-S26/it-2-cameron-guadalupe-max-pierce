@@ -32,6 +32,12 @@ export class AddItemComponent {
     );
   });
 
+  displayTypeLabel = (value: string | null): string => {
+    if (!value) return '';
+    const match = this.inventoryService.typeOptions.find(option => option.value === value);
+    return match ? match.label : value;
+  };
+
   addInventoryForm = new FormGroup({
     // We allow alphanumeric input and limit the length for name.
     name: new FormControl('', Validators.compose([

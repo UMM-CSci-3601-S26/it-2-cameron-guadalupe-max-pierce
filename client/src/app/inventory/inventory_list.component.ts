@@ -70,6 +70,12 @@ export class InventoryListComponent {
     );
   });
 
+  displayTypeLabel = (value: string | null): string => {
+    if (!value) return '';
+    const match = this.filteredTypeOptions().find(option => option.value === value);
+    return match ? match.label : value;
+  };
+
   errMsg = signal<string | undefined>(undefined);
 
 

@@ -52,8 +52,14 @@
 
             <mat-form-field>
               <mat-label>Type</mat-label>
-              <input matInput formControlName="type" [matAutocomplete]="typeAuto" (input)="typeInput.set($any($event.target).value)" required>
-              <mat-autocomplete #typeAuto="matAutocomplete">
+              <input
+                matInput
+                formControlName="type"
+                [matAutocomplete]="typeAuto"
+                (input)="typeInput.set($any($event.target).value)"
+                required
+              >
+              <mat-autocomplete #typeAuto="matAutocomplete" [displayWith]="displayTypeLabel">
                 @for (option of filteredTypeOptions(); track option.value) {
                   <mat-option [value]="option.value">{{ option.label }}</mat-option>
                 }
