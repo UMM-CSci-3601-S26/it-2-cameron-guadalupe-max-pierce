@@ -58,30 +58,24 @@ export class MockInventoryService implements Pick<InventoryService, 'getItems' |
   // this warning for just his function.
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getItems(_filters: { name?: string; stocked?: number; desc?: string; location?: string; type?: string;}): Observable<InventoryItem[]> {
-    // Our goal here isn't to test (and thus rewrite) the service, so we'll
-    // keep it simple and just return the test users regardless of what
-    // filters are passed in.
-    //
-    // The `of()` function converts a regular object or value into an
-    // `Observable` of that object or value.
     return of(MockInventoryService.testItems);
   }
 
   //Probably unessesary
   // skipcq: JS-0105
-  // getUserById(id: string): Observable<User> {
-  //   // If the specified ID is for one of the first two test users,
-  //   // return that user, otherwise return `null` so
-  //   // we can test illegal user requests.
-  //   // If you need more, just add those in too.
-  //   if (id === MockUserService.testUsers[0]._id) {
-  //     return of(MockUserService.testUsers[0]);
-  //   } else if (id === MockUserService.testUsers[1]._id) {
-  //     return of(MockUserService.testUsers[1]);
-  //   } else {
-  //     return of(null);
-  //   }
-  // }
+  getItemById(id: string): Observable<InventoryItem> {
+    // If the specified ID is for one of the first two test users,
+    // return that user, otherwise return `null` so
+    // we can test illegal user requests.
+    // If you need more, just add those in too.
+    if (id === MockInventoryService.testItems[0]._id) {
+      return of(MockInventoryService.testItems[0]);
+    } else if (id === MockInventoryService.testItems[1]._id) {
+      return of(MockInventoryService.testItems[1]);
+    } else {
+      return of(null);
+    }
+  }
 
   //Todo
   addItem(item: Partial<InventoryItem>): Observable<string> {

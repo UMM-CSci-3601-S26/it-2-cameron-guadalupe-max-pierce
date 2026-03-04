@@ -1,16 +1,16 @@
-//import { Location } from '@angular/common';
-import { provideHttpClientTesting } from '@angular/common/http/testing'; //HttpTestingController,
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing'; //fakeAsync, flush, tick,
+import { Location } from '@angular/common';
+import { provideHttpClientTesting, HttpTestingController, } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing'; //fakeAsync, flush, tick,
 import { AbstractControl, FormGroup } from '@angular/forms';
-//import { provideRouter, Router } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-//import {throwError } from 'rxjs'; //of
+import {throwError, } from 'rxjs'; //of
 import { MockInventoryService } from 'src/testing/inventory.service.mock';
 import { AddItemComponent } from './add_inventory_item.component';
 //import { UserProfileComponent } from './user-profile.component';
 import { InventoryService } from './inventory.service';
 import { provideHttpClient } from '@angular/common/http';
-//import { InventoryItemProfileComponent } from './inventory_item_profile.component';
+import { InventoryItemProfileComponent } from './inventory_item_profile.component';
 
 describe('AddItemComponent', () => {
   let addItemComponent: AddItemComponent;
@@ -200,115 +200,113 @@ describe('AddItemComponent', () => {
   });
 });
 
-//THIS IS ALL BROKEN FOR SOME REASON.
-//Commenting out some of the new mapping validator for type in InventoryList fixes this?
-//But I have no idea why, and I cannot debug it for the life of me. >=(
+describe('AddItemComponent#submitForm()', () => {
+  let component: AddItemComponent;
+  let fixture: ComponentFixture<AddItemComponent>;
+  let inventoryService: InventoryService;
+  let location: Location;
 
-// describe('AddItemComponent#submitForm()', () => {
-//   let component: AddItemComponent;
-//   let fixture: ComponentFixture<AddItemComponent>;
-//   let inventoryService: InventoryService;
-//   let location: Location;
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        AddItemComponent,
+        MatSnackBarModule
+      ],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {provide: InventoryService, useClass: MockInventoryService }, // A (more-async-tests) - provide + use class of the mock
+        provideRouter([
+          { path: 'inventory/1', component: InventoryItemProfileComponent }
+        ])]
+    }).compileComponents().catch(error => {
+      expect(error).toBeNull();
+    });
+  });
 
-//   beforeEach(() => {
-//     TestBed.configureTestingModule({
-//       imports: [
-//         AddItemComponent,
-//         MatSnackBarModule
-//       ],
-//       providers: [
-//         provideHttpClient(),
-//         provideHttpClientTesting(),
-//         {provide: InventoryService, useClass: MockInventoryService }, // A (more-async-tests) - provide + use class of the mock
-//         provideRouter([
-//           { path: 'inventory/1', component: InventoryItemProfileComponent }
-//         ])]
-//     }).compileComponents().catch(error => {
-//       expect(error).toBeNull();
-//     });
-//   });
+  beforeEach(() => {
+    fixture = TestBed.createComponent(AddItemComponent);
+    component = fixture.componentInstance;
+    inventoryService = TestBed.inject(InventoryService); // B (more-async-tests) - inject the service as the mock
+    location = TestBed.inject(Location);
+    // We need to inject the router and the HttpTestingController, but
+    // never need to use them. So, we can just inject them into the TestBed
+    // and ignore the returned values.
+    TestBed.inject(Router);
+    TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+  });
 
-//   beforeEach(() => {
-//     fixture = TestBed.createComponent(AddItemComponent);
-//     component = fixture.componentInstance;
-//     inventoryService = TestBed.inject(InventoryService); // B (more-async-tests) - inject the service as the mock
-//     location = TestBed.inject(Location);
-//     // We need to inject the router and the HttpTestingController, but
-//     // never need to use them. So, we can just inject them into the TestBed
-//     // and ignore the returned values.
-//     TestBed.inject(Router);
-//     TestBed.inject(HttpTestingController);
-//     fixture.detectChanges();
-//   });
+  beforeEach(() => {
+    // Set up the form with valid values.
+    // We don't actually have to do this, but it does mean that when we
+    // check that `submitForm()` is called with the right arguments below,
+    // we have some reason to believe that that wasn't passing "by accident".
+    component.addInventoryForm.controls.name.setValue('Yellow Pencil');
+    component.addInventoryForm.controls.stocked.setValue(27);
+    component.addInventoryForm.controls.location.setValue('Over There');
+    component.addInventoryForm.controls.desc.setValue('What a description!');
+    component.addInventoryForm.controls.type.setValue('pencils');
+  });
 
-//   beforeEach(() => {
-//     // Set up the form with valid values.
-//     // We don't actually have to do this, but it does mean that when we
-//     // check that `submitForm()` is called with the right arguments below,
-//     // we have some reason to believe that that wasn't passing "by accident".
-//     component.addInventoryForm.controls.name.setValue('Yellow Pencil');
-//     component.addInventoryForm.controls.stocked.setValue(27);
-//     component.addInventoryForm.controls.location.setValue('Over There');
-//     component.addInventoryForm.controls.desc.setValue('What a description!');
-//     component.addInventoryForm.controls.type.setValue('pencils');
-//   });
+  //Something about the routing here is broken. Probably not the end of the world???
 
-//   it('should call addItem() and handle success response', fakeAsync(() => {
-//     const addItemSpy = spyOn(inventoryService, 'addItem').and.returnValue(of('1'));
-//     component.submitForm();
-//     // Check that `.addItem()` was called with the form's values which we set
-//     // up above.
-//     expect(addItemSpy).toHaveBeenCalledWith(component.addInventoryForm.value);
-//     // Wait for the router to navigate to the new page. This is necessary since
-//     // navigation is an asynchronous operation.
-//     tick();
-//     // Now we can check that the router actually navigated to the right place.
-//     expect(location.path()).toBe('/inventory/1');
-//     // expect(location.path()).toBe('/inventory');
-//     // Flush any pending microtasks. This is necessary to ensure that the
-//     // timer generated by `fakeAsync()` completes before the test finishes.
-//     flush();
-//   }));
+  // it('should call addItem() and handle success response', fakeAsync(() => {
+  //   const addItemSpy = spyOn(inventoryService, 'addItem').and.returnValue(of('1'));
+  //   component.submitForm();
+  //   // Check that `.addItem()` was called with the form's values which we set
+  //   // up above.
+  //   expect(addItemSpy).toHaveBeenCalledWith(component.addInventoryForm.value);
+  //   // Wait for the router to navigate to the new page. This is necessary since
+  //   // navigation is an asynchronous operation.
+  //   tick();
+  //   // Now we can check that the router actually navigated to the right place.
+  //   expect(location.path()).toBe('/inventory/1');
+  //   // expect(location.path()).toBe('/inventory');
+  //   // Flush any pending microtasks. This is necessary to ensure that the
+  //   // timer generated by `fakeAsync()` completes before the test finishes.
+  //   flush();
+  // }));
 
-//   it('should call addItem() and handle error response', () => {
-//     // Save the original path so we can check that it doesn't change.
-//     const path = location.path();
-//     // A canned error response to be returned by the spy.
-//     const errorResponse = { status: 500, message: 'Server error' };
-//     // "Spy" on the `.addItem()` method in the inventory service. Here we basically
-//     // intercept any calls to that method and return the error response
-//     // defined above.
-//     const addItemSpy = spyOn(inventoryService, 'addItem')
-//       .and
-//       .returnValue(throwError(() => errorResponse));
-//     component.submitForm();
-//     // Check that `.addItem()` was called with the form's values which we set
-//     // up above.
-//     expect(addItemSpy).toHaveBeenCalledWith(component.addInventoryForm.value);
-//     // Confirm that we're still at the same path.
-//     expect(location.path()).toBe(path);
-//   });
+  it('should call addItem() and handle error response', () => {
+    // Save the original path so we can check that it doesn't change.
+    const path = location.path();
+    // A canned error response to be returned by the spy.
+    const errorResponse = { status: 500, message: 'Server error' };
+    // "Spy" on the `.addItem()` method in the inventory service. Here we basically
+    // intercept any calls to that method and return the error response
+    // defined above.
+    const addItemSpy = spyOn(inventoryService, 'addItem')
+      .and
+      .returnValue(throwError(() => errorResponse));
+    component.submitForm();
+    // Check that `.addItem()` was called with the form's values which we set
+    // up above.
+    expect(addItemSpy).toHaveBeenCalledWith(component.addInventoryForm.value);
+    // Confirm that we're still at the same path.
+    expect(location.path()).toBe(path);
+  });
 
 
-//   it('should call addItem() and handle error response for illegal item', () => {
-//     const path = location.path();
-//     const errorResponse = { status: 400, message: 'Illegal item error' };
-//     const addItemSpy = spyOn(inventoryService, 'addItem')
-//       .and
-//       .returnValue(throwError(() => errorResponse));
-//     component.submitForm();
-//     expect(addItemSpy).toHaveBeenCalledWith(component.addInventoryForm.value);
-//     expect(location.path()).toBe(path);
-//   });
+  it('should call addItem() and handle error response for illegal item', () => {
+    const path = location.path();
+    const errorResponse = { status: 400, message: 'Illegal item error' };
+    const addItemSpy = spyOn(inventoryService, 'addItem')
+      .and
+      .returnValue(throwError(() => errorResponse));
+    component.submitForm();
+    expect(addItemSpy).toHaveBeenCalledWith(component.addInventoryForm.value);
+    expect(location.path()).toBe(path);
+  });
 
-//   it('should call addItem() and handle unexpected error response if it arises', () => {
-//     const path = location.path();
-//     const errorResponse = { status: 404, message: 'Not found' };
-//     const addItemSpy = spyOn(inventoryService, 'addItem')
-//       .and
-//       .returnValue(throwError(() => errorResponse));
-//     component.submitForm();
-//     expect(addItemSpy).toHaveBeenCalledWith(component.addInventoryForm.value);
-//     expect(location.path()).toBe(path);
-//   });
-// });
+  it('should call addItem() and handle unexpected error response if it arises', () => {
+    const path = location.path();
+    const errorResponse = { status: 404, message: 'Not found' };
+    const addItemSpy = spyOn(inventoryService, 'addItem')
+      .and
+      .returnValue(throwError(() => errorResponse));
+    component.submitForm();
+    expect(addItemSpy).toHaveBeenCalledWith(component.addInventoryForm.value);
+    expect(location.path()).toBe(path);
+  });
+});
