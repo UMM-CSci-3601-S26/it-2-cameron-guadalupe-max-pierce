@@ -2,7 +2,7 @@ import { InventoryItem } from 'src/app/inventory/inventory_item';
 
 export class AddItemPage {
 
-  private readonly url = '/items/new';
+  private readonly url = '/inventory/new';
   private readonly title = '.add-inventory-title';
   private readonly button = '[data-test=confirmAddItemButton]';
   private readonly snackBar = '.mat-mdc-simple-snack-bar';
@@ -26,10 +26,8 @@ export class AddItemPage {
   }
 
   selectMatSelectValue(select: Cypress.Chainable, value: string) {
-    // Find and click the drop down
-    return select.click()
-      // Select and click the desired value from the resulting menu
-      .get(`${this.dropDownSelector}[value="${value}"]`).click();
+    select.click();
+    return cy.get('mat-option').contains(value).click();
   }
 
   getFormField(fieldName: string) {
@@ -53,7 +51,9 @@ export class AddItemPage {
     if (newItem.location) {
       this.getFormField(this.locationFieldName).type(newItem.location);
     }
-    this.selectMatSelectValue(this.getFormField('desc'), newItem.desc);
+    if (newItem.desc) {
+      this.getFormField('desc').type(newItem.desc);
+    }
     return this.addItemButton().click();
   }
 }

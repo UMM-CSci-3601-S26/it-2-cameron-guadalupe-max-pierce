@@ -17,15 +17,16 @@ describe('Add item', () => {
     // are filled. Once the last (`#emailField`) is filled, then the button should
     // become enabled.
     page.addItemButton().should('be.disabled');
-    page.getFormField('name').type('test');
+    page.getFormField('name').type('Test Item');
     page.addItemButton().should('be.disabled');
-    page.getFormField('age').type('20');
-    page.addUserButton().should('be.disabled');
-    page.getFormField('email').type('invalid');
-    page.addUserButton().should('be.disabled');
-    page.getFormField('email').clear().type('user@example.com');
-    // all the required fields have valid input, then it should be enabled
-    page.addUserButton().should('be.enabled');
+    page.getFormField('stocked').type('10');
+    page.addItemButton().should('be.disabled');
+    page.getFormField('type').type('pencil');
+    page.addItemButton().should('be.disabled');
+    page.getFormField('location').type('tote #9');
+    page.addItemButton().should('be.disabled');
+    page.getFormField('desc').type('Yellow Pencils Pack of 12');
+    page.addItemButton().should('be.enabled');
   });
 
   it('Should show error messages for invalid inputs', () => {
@@ -44,38 +45,25 @@ describe('Add item', () => {
       .blur();
     cy.get('[data-test=nameError]').should('exist').and('be.visible');
     // Entering a valid name should remove the error.
-    page.getFormField('name').clear().type('John Smith').blur();
+    page.getFormField('name').clear().type('Valid Item Name').blur();
     cy.get('[data-test=nameError]').should('not.exist');
 
     // Before doing anything there shouldn't be an error
-    cy.get('[data-test=ageError]').should('not.exist');
+    cy.get('[data-test=stockedError]').should('not.exist');
     // Just clicking the age field without entering anything should cause an error message
-    page.getFormField('age').click().blur();
+    page.getFormField('stocked').click().blur();
     // Some more tests for various invalid age inputs
-    cy.get('[data-test=ageError]').should('exist').and('be.visible');
-    page.getFormField('age').type('5').blur();
-    cy.get('[data-test=ageError]').should('exist').and('be.visible');
-    page.getFormField('age').clear().type('500').blur();
-    cy.get('[data-test=ageError]').should('exist').and('be.visible');
-    page.getFormField('age').clear().type('asd').blur();
-    cy.get('[data-test=ageError]').should('exist').and('be.visible');
+    cy.get('[data-test=stockedError]').should('exist').and('be.visible');
+    page.getFormField('stocked').type('-5').blur();
+    cy.get('[data-test=stockedError]').should('exist').and('be.visible');
+    page.getFormField('stocked').clear().type('5000').blur();
+    cy.get('[data-test=stockedError]').should('exist').and('be.visible');
+    page.getFormField('stocked').clear().type('abc').blur();
+    cy.get('[data-test=stockedError]').should('exist').and('be.visible');
     // Entering a valid age should remove the error.
-    page.getFormField('age').clear().type('25').blur();
-    cy.get('[data-test=ageError]').should('not.exist');
+    page.getFormField('stocked').clear().type('25').blur();
+    cy.get('[data-test=stockedError]').should('not.exist');
 
-    // Before doing anything there shouldn't be an error
-    cy.get('[data-test=emailError]').should('not.exist');
-    // Just clicking the email field without entering anything should cause an error message
-    page.getFormField('email').click().blur();
-    // Some more tests for various invalid email inputs
-    cy.get('[data-test=emailError]').should('exist').and('be.visible');
-    page.getFormField('email').type('asd').blur();
-    cy.get('[data-test=emailError]').should('exist').and('be.visible');
-    page.getFormField('email').clear().type('@example.com').blur();
-    cy.get('[data-test=emailError]').should('exist').and('be.visible');
-    // Entering a valid email should remove the error.
-    page.getFormField('email').clear().type('user@example.com').blur();
-    cy.get('[data-test=emailError]').should('not.exist');
   });
 
   describe('Adding a new user', () => {
@@ -84,13 +72,13 @@ describe('Add item', () => {
     });
 
     it('Should go to the right page, and have the right info', () => {
-      const user: User = {
+      const item: InventoryItem = {
         _id: null,
-        name: 'Test User',
-        age: 30,
-        company: 'Test Company',
-        email: 'test@example.com',
-        role: 'editor',
+        name: 'Blue Pen 10-Pack',
+        type: 'pen',
+        desc: 'Blue ink, pack of 10',
+        location: 'Tote #9',
+        stocked: 25,
       };
 
       // The `page.addUser(user)` call ends with clicking the "Add User"
@@ -113,37 +101,37 @@ describe('Add item', () => {
       // hopefully ensures that the server (and database) have completed all their
       // work, and that we should have a properly formed page on the client end
       // to check.
-      cy.intercept('/api/users').as('addUser');
-      page.addUser(user);
-      cy.wait('@addUser');
+      cy.intercept('POST', '/api/inventory').as('addItem');
+      page.addItem(item);
+      cy.wait('@addItem');
 
       // New URL should end in the 24 hex character Mongo ID of the newly added user.
       // We'll wait up to five full minutes for this these `should()` assertions to succeed.
       // Hopefully that long timeout will help ensure that our Cypress tests pass in
       // GitHub Actions, where we're often running on slow VMs.
       cy.url({ timeout: 300000 })
-        .should('match', /\/users\/[0-9a-fA-F]{24}$/)
-        .should('not.match', /\/users\/new$/);
+        .should('match', /\/inventory\/[0-9a-fA-F]{24}$/)
+        .should('not.match', /\/inventory\/new$/);
 
       // The new user should have all the same attributes as we entered
-      cy.get('.user-card-name').should('have.text', user.name);
-      cy.get('.user-card-company').should('have.text', user.company);
-      cy.get('.user-card-role').should('have.text', user.role);
-      cy.get('.user-card-age').should('have.text', user.age);
-      cy.get('.user-card-email').should('have.text', user.email);
+      cy.get('.user-card-name').should('have.text', item.name);
+      cy.get('.user-card-type').should('have.text', item.type);
+      cy.get('.user-card-desc').should('have.text', item.desc);
+      cy.get('.user-card-location').should('have.text', item.location);
+      cy.get('.user-card-stocked').should('have.text', item.stocked.toString());
 
       // We should see the confirmation message at the bottom of the screen
-      page.getSnackBar().should('contain', `Added user ${user.name}`);
+      page.getSnackBar().should('contain', `Added item ${item.name}`);
     });
 
     it('Should fail with no company', () => {
-      const user: User = {
+      const item: InventoryItem = {
         _id: null,
-        name: 'Test User',
-        age: 30,
-        company: null, // The company being set to null means nothing will be typed for it
-        email: 'test@example.com',
-        role: 'editor',
+        name: 'Bad Item',
+        type: 'pen',
+        location: null, // The company being set to null means nothing will be typed for it
+        desc: 'missing location',
+        stocked: 10,
       };
 
       // Here we're _not_ expecting to route to `/api/users` since adding this
@@ -151,21 +139,21 @@ describe('Add item', () => {
       // around this `page.addUser(user)` call. If we _did_ add them, the test wouldn't
       // actually fail because a `cy.wait()` that times out isn't considered a failure,
       // although we could catch the timeout and turn it into a failure if we needed to.
-      page.addUser(user);
+      page.addItem(item);
 
       // We should get an error message
-      page.getSnackBar().should('contain', 'Tried to add an illegal new user');
+      page.getSnackBar().should('contain', 'Tried to add an illegal new item');
 
       // We should have stayed on the new user page
       cy.url()
-        .should('not.match', /\/users\/[0-9a-fA-F]{24}$/)
-        .should('match', /\/users\/new$/);
+        .should('not.match', /\/inventory\/[0-9a-fA-F]{24}$/)
+        .should('match', /\/inventory\/new$/);
 
       // The things we entered in the form should still be there
-      page.getFormField('name').should('have.value', user.name);
-      page.getFormField('age').should('have.value', user.age);
-      page.getFormField('email').should('have.value', user.email);
-      page.getFormField('role').should('contain', 'Editor');
+      page.getFormField('name').should('have.value', item.name);
+      page.getFormField('type').should('have.value', item.type);
+      page.getFormField('desc').should('have.value', item.desc);
+      page.getFormField('stocked').should('have.value', item.stocked.toString());
     });
   });
 });

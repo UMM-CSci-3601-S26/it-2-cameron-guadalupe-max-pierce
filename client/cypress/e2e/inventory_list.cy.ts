@@ -19,7 +19,7 @@ describe('Item list', () => {
   it('Should show 10 users in both card and list view', () => {
     page.getItemCards().should('have.length', 10);
     page.changeView('list');
-    page.getItemListItems().should('have.length', 100);
+    page.getItemListItems().should('have.length', 10);
   });
 
   it('Should type something in the name filter and check that it returned correct elements', () => {
@@ -110,19 +110,21 @@ describe('Item list', () => {
     page.getItemListItems().should('not.exist');
   });
 
-  it('Should select a desc, switch the view, and check that it returned correct elements', () => {
-    // Filter for desc 'Yellow #2 Ticonderoga pencils, sharpened, comes in packs of 12');
-    page.selectDesc('Yellow #2 Ticonderoga pencils, sharpened, comes in packs of 12');
+  it('Should type something in the description filter, switch the view, and check that it returned correct elements', () => {
 
-    // Choose the view type "List"
+    cy.get('[data-test=itemDescInput]')
+      .type('Yellow #2 Ticonderoga pencils, sharpened, comes in packs of 12');
+
     page.changeView('list');
 
-    // Some of the users should be listed
     page.getItemListItems().should('have.lengthOf.above', 0);
 
-    // All of the user list items that show should have the role we are looking for
     page.getItemListItems().each(el => {
-      cy.wrap(el).find('.item-list-desc').should('contain', 'Yellow #2 Ticonderoga pencils, sharpened, comes in packs of 12');
+      cy.wrap(el)
+        .find('.item-list-desc')
+        .should('contain',
+          'Yellow #2 Ticonderoga pencils, sharpened, comes in packs of 12'
+        );
     });
   });
 
