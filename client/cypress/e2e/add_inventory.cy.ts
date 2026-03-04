@@ -12,61 +12,48 @@ describe('Add item', () => {
     page.getTitle().should('have.text', 'New Item');
   });
 
-  it('Should enable and disable the add user button', () => {
-    // ADD USER button should be disabled until all the necessary fields
+  it('Should enable and disable the add item button', () => {
+    // ADD Item button should be disabled until all the necessary fields
     // are filled. Once the last (`#emailField`) is filled, then the button should
     // become enabled.
     page.addItemButton().should('be.disabled');
-    page.getFormField('name').type('Test Item');
+    page.getFormField('name').type('Yellow Pencils 12-Pack');
     page.addItemButton().should('be.disabled');
-    page.getFormField('stocked').type('10');
+    page.getFormField('stocked').type('0');
     page.addItemButton().should('be.disabled');
-    page.getFormField('type').type('pencil');
+    page.selectMatSelectValue(page.getFormField('type'),'pencil');
     page.addItemButton().should('be.disabled');
-    page.getFormField('location').type('tote #9');
+    page.getFormField('location').type('tote #1');
     page.addItemButton().should('be.disabled');
-    page.getFormField('desc').type('Yellow Pencils Pack of 12');
+    page.getFormField('desc').type('Yellow #2 Ticonderoga pencils, sharpened, comes in pack of 12');
     page.addItemButton().should('be.enabled');
   });
 
   it('Should show error messages for invalid inputs', () => {
-    // Before doing anything there shouldn't be an error
+    // Name errors
     cy.get('[data-test=nameError]').should('not.exist');
-    // Just clicking the name field without entering anything should cause an error message
     page.getFormField('name').click().blur();
     cy.get('[data-test=nameError]').should('exist').and('be.visible');
-    // Some more tests for various invalid name inputs
     page.getFormField('name').type('J').blur();
     cy.get('[data-test=nameError]').should('exist').and('be.visible');
-    page
-      .getFormField('name')
-      .clear()
-      .type('This is a very long name that goes beyond the 50 character limit')
-      .blur();
+    page.getFormField('name').clear().type('A very long item name that exceeds fifty characters for testing').blur();
     cy.get('[data-test=nameError]').should('exist').and('be.visible');
-    // Entering a valid name should remove the error.
-    page.getFormField('name').clear().type('Valid Item Name').blur();
+    page.getFormField('name').clear().type('Yellow Pencils 12-Pack').blur();
     cy.get('[data-test=nameError]').should('not.exist');
 
-    // Before doing anything there shouldn't be an error
+    // Stocked errors
     cy.get('[data-test=stockedError]').should('not.exist');
-    // Just clicking the age field without entering anything should cause an error message
     page.getFormField('stocked').click().blur();
-    // Some more tests for various invalid age inputs
     cy.get('[data-test=stockedError]').should('exist').and('be.visible');
     page.getFormField('stocked').type('-5').blur();
     cy.get('[data-test=stockedError]').should('exist').and('be.visible');
-    page.getFormField('stocked').clear().type('5000').blur();
-    cy.get('[data-test=stockedError]').should('exist').and('be.visible');
     page.getFormField('stocked').clear().type('abc').blur();
     cy.get('[data-test=stockedError]').should('exist').and('be.visible');
-    // Entering a valid age should remove the error.
-    page.getFormField('stocked').clear().type('25').blur();
+    page.getFormField('stocked').clear().type('0').blur();
     cy.get('[data-test=stockedError]').should('not.exist');
-
   });
 
-  describe('Adding a new user', () => {
+  describe('Adding a new item', () => {
     beforeEach(() => {
       cy.task('seed:database');
     });
@@ -74,33 +61,13 @@ describe('Add item', () => {
     it('Should go to the right page, and have the right info', () => {
       const item: InventoryItem = {
         _id: null,
-        name: 'Blue Pen 10-Pack',
-        type: 'pen',
-        desc: 'Blue ink, pack of 10',
-        location: 'Tote #9',
-        stocked: 25,
+        name: 'Red Folders',
+        type: 'folder',
+        desc: 'Red plastic folders, GreatValue',
+        location: 'Tote #2',
+        stocked: 3,
       };
 
-      // The `page.addUser(user)` call ends with clicking the "Add User"
-      // button on the interface. That then leads to the client sending an
-      // HTTP request to the server, which has to process that request
-      // (including making calls to add the user to the database and wait
-      // for those to respond) before we get a response and can update the GUI.
-      // By calling `cy.intercept()` we're saying we want Cypress to "notice"
-      // when we go to `/api/users`. The `AddUserComponent.submitForm()` method
-      // routes to `/api/users/{MongoDB-ID}` if the REST request to add the user
-      // succeeds, and that routing will get "noticed" by the Cypress because
-      // of the `cy.intercept()` call.
-      //
-      // The `.as('addUser')` call basically gives that event a name (`addUser`)
-      // which we can use in things like `cy.wait()` to say which event or events
-      // we want to wait for.
-      //
-      // The `cy.wait('@addUser')` tells Cypress to wait until we have successfully
-      // routed to `/api/users` before we continue with the following checks. This
-      // hopefully ensures that the server (and database) have completed all their
-      // work, and that we should have a properly formed page on the client end
-      // to check.
       cy.intercept('POST', '/api/inventory').as('addItem');
       page.addItem(item);
       cy.wait('@addItem');
@@ -124,14 +91,14 @@ describe('Add item', () => {
       page.getSnackBar().should('contain', `Added item ${item.name}`);
     });
 
-    it('Should fail with no company', () => {
+    it('Should fail with no location', () => {
       const item: InventoryItem = {
         _id: null,
         name: 'Bad Item',
-        type: 'pen',
+        type: 'eraser',
         location: null, // The company being set to null means nothing will be typed for it
         desc: 'missing location',
-        stocked: 10,
+        stocked: 5,
       };
 
       // Here we're _not_ expecting to route to `/api/users` since adding this
