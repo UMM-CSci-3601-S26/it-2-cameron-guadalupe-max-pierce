@@ -27,20 +27,22 @@
             <mat-hint>Minimum</mat-hint>
           </mat-form-field>
 
-           <mat-form-field class="input-field">
-            <!-- <mat-label>Desc</mat-label> -->
-            <mat-select placeholder="Any Type" [(ngModel)]="itemType" data-test="itemDescSelect">
-              <mat-option>Any Type</mat-option> <!--No Value, does not display normally w/out placeholder -->
-              <mat-option value="pencil">Pencils</mat-option>
-              <mat-option value="colored_pencil">Colored Pencils</mat-option>
-              <mat-option value="crayon">Crayons</mat-option>
-              <mat-option value="pen">Pens</mat-option>
-              <mat-option value="eraser">Erasers</mat-option>
-              <mat-option value="folder">Folders</mat-option>
-              <mat-option value="sharpener">Sharpeners</mat-option>
-              <mat-option value="box">Boxes</mat-option>
-              <mat-option value="other">Other</mat-option>
-            </mat-select>
+          <mat-form-field class="input-field">
+            <mat-label>Type</mat-label>
+            <input
+              matInput
+              placeholder="Any Type"
+              [ngModel]="itemType()"
+              (ngModelChange)="itemType.set($event)"
+              [matAutocomplete]="auto"
+              data-test="itemDescSelect"
+            >
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayTypeLabel">
+              <mat-option [value]="''">Any Type</mat-option>
+              @for (option of filteredTypeOptions(); track option.value) {
+                <mat-option [value]="option.value">{{ option.label }}</mat-option>
+              }
+            </mat-autocomplete>
             <mat-hint>Search by type</mat-hint>
           </mat-form-field>
         </div>
@@ -86,6 +88,9 @@
               } -->
               <span matListItemTitle mat-line class="item-list-name"> x{{item.stocked}} ~ {{item.name}}</span>
               <span matListItemLine class="item-list-desc"> {{item.desc}} ~ stored in {{item.location}}</span>
+              <!-- <span>
+                <button mat-button data-test="viewProfileButton" [routerLink]="['/inventory', item._id]">Modify</button>
+              </span> -->
             </a>
             }
           </mat-nav-list>
@@ -96,10 +101,10 @@
   } @else {
   <div class="flex-1" class="item-error">
     <mat-error>
-      There was a problem loading the items. Try checking your network; otherwise, the server may be down.
+      Loading items...
     </mat-error>
     <mat-error>
-      Please wait a bit and try again.
+      If items aren't loading, check your network and server.
     </mat-error>
   </div>
   }
