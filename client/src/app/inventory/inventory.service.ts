@@ -174,16 +174,16 @@ export class InventoryService {
         return i2.location.localeCompare(i1.location);
       });
       break;
-    case "type":
-      filteredItems = filteredItems.sort((i1,i2) => {
-        return i1.type.localeCompare(i2.type);
-      });
-      break;
-    case "type_des":
-      filteredItems = filteredItems.sort((i1,i2) => {
-        return i2.type.localeCompare(i1.type);
-      });
-      break;
+    // case "type":
+    //  filteredItems = filteredItems.sort((i1,i2) => {
+    //     return i1.type.localeCompare(i2.type);
+    //   });
+    //   break;
+    // case "type_des":
+    //   filteredItems = filteredItems.sort((i1,i2) => {
+    //     return i2.type.localeCompare(i1.type);
+    //   });
+    //   break;
     case "name":
       filteredItems = filteredItems.sort((i1,i2) => {
         return i1.name.localeCompare(i2.name);

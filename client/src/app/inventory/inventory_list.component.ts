@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { catchError, combineLatest, of, switchMap, tap } from 'rxjs';
 import { InventoryItem } from './inventory_item';
+//import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 //import { InventoryCardComponent } from './inventory_card.component';
 import { InventoryService } from './inventory.service';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
@@ -43,6 +44,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatAutocompleteModule,
     MatOptionModule,
     MatRadioModule,
+    // MatTableModule,
     //InventoryCardComponent,
     MatListModule,
     RouterLink,
@@ -56,6 +58,7 @@ export class InventoryListComponent {
   // snackBar the `MatSnackBar` used to display feedback
   private snackBar = inject(MatSnackBar);
 
+  //dataSource = new MatTableDataSource<InventoryItem>([]);
   itemName = signal<string|undefined>(undefined);
   itemStock = signal<number|undefined>(undefined);
   itemDesc = signal<string|undefined>(undefined);
@@ -122,4 +125,25 @@ export class InventoryListComponent {
       // company: this.userCompany(),
     });
   });
+
+  typeFilteredItems = computed(() => {
+    const currentItems = this.serverFilteredItems();
+    const typedArray: { header: string, items: InventoryItem[] }[] = [];
+
+    for (let i = 0; i < this.inventoryService.typeOptions.length - 1; i++) {
+      typedArray.push({
+        header: this.inventoryService.typeOptions[i].label,
+        items: this.inventoryService.filterItems(currentItems, {
+          name: this.itemName(),
+          type: this.inventoryService.typeOptions[i].value,
+          stocked: this.itemStock(),
+          desc: this.itemDesc(),
+          location: this.itemLocation(),
+          sortBy: this.sortBy()
+        })
+      })
+    }
+
+    return typedArray;
+  })
 }
