@@ -256,10 +256,8 @@ export class InventoryService {
       } else {
         newItems[i].type = oldItems[i].type;
       }
-      this.addItem(newItems[i]).subscribe(); //Does order matter here? Should have different ids.
+      this.addItem(newItems[i]).subscribe(); //Need to subscribe for changes to take effect
       this.deleteItem(oldItems[i]._id).subscribe();
     }
-    //We then need to reload the entire page to process changes.
-    //window.location.reload();
   }
 }
