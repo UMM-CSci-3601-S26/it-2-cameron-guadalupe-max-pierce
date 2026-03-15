@@ -64,18 +64,8 @@ export class InventoryService {
   ];
 
   /**
-   * Get all the items from the server, filtered by the information
-   * in the `filters` map.
-   *
-   *
-   * @param filters a map that allows us to specify a target role, age,
-   *  or company to filter by, or any combination of those
-   * @returns an `Observable` of an array of `InventoryItems`. Wrapping the array
-   *  in an `Observable` means that other bits of of code can `subscribe` to
-   *  the result (the `Observable`) and get the results that come back
-   *  from the server after a possibly substantial delay (because we're
-   *  contacting a remote server over the Internet).
-   */
+   * @param fields a map that specifies which search terms to save
+  */
   updateSavedSearch(fields?: {name?: string; stocked?: number; desc?: string; location?: string; type?: string; sortby?: string;}) {
     if (fields.name) {
       this.savedInventoryName = fields.name;
@@ -97,6 +87,19 @@ export class InventoryService {
     }
   }
 
+  /**
+   * Get all the items from the server, filtered by the information
+   * in the `filters` map.
+   *
+   *
+   * @param filters a map that allows us to specify a target role, age,
+   *  or company to filter by, or any combination of those
+   * @returns an `Observable` of an array of `InventoryItems`. Wrapping the array
+   *  in an `Observable` means that other bits of of code can `subscribe` to
+   *  the result (the `Observable`) and get the results that come back
+   *  from the server after a possibly substantial delay (because we're
+   *  contacting a remote server over the Internet).
+   */
   getItems(filters?: { name?: string; stocked?: number; desc?: string; location?: string; type?: string; }): Observable<InventoryItem[]> {
     // `HttpParams` is essentially just a map used to hold key-value
     // pairs that are then encoded as "?key1=value1&key2=value2&…" in
