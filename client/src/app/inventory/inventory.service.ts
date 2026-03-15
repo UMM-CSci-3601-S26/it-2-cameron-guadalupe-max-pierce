@@ -66,25 +66,15 @@ export class InventoryService {
   /**
    * @param fields a map that specifies which search terms to save
   */
-  updateSavedSearch(fields?: {name?: string; stocked?: number; desc?: string; location?: string; type?: string; sortby?: string;}) {
-    if (fields.name) {
-      this.savedInventoryName = fields.name;
-    }
-    if (fields.stocked) {
-      this.savedInventoryStocked = fields.stocked;
-    }
-    if (fields.desc) {
-      this.savedInventoryDesc = fields.desc;
-    }
-    if (fields.location) {
-      this.savedInventoryLocation = fields.location;
-    }
-    if (fields.type) {
-      this.savedInventoryType = fields.type;
-    }
-    if (fields.sortby) {
-      this.savedInventorySortBy = fields.sortby;
-    }
+  updateSavedSearch(fields: {name: string; stocked: number; desc: string; location: string; type: string; sortby: string;}) {
+    //Formerly checked if fields were provided; now required.
+    //Defaults to empty strings and zeros.
+    this.savedInventoryName = fields.name;
+    this.savedInventoryStocked = fields.stocked;
+    this.savedInventoryDesc = fields.desc;
+    this.savedInventoryLocation = fields.location;
+    this.savedInventoryType = fields.type;
+    this.savedInventorySortBy = fields.sortby;
   }
 
   /**

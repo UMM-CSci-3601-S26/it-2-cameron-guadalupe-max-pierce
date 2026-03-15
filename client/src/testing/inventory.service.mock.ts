@@ -61,25 +61,15 @@ export class MockInventoryService implements Pick<InventoryService, 'getItems' |
   typeOptions = this.realService.typeOptions;
 
   //For testing purposes, this is identical to the actual service. (Otherwise linting is mad about not using fields.)
-  updateSavedSearch(fields?: { name?: string; stocked?: number; desc?: string; location?: string; type?: string; sortby?: string; }): void {
-    if (fields.name) {
-      this.savedInventoryName = fields.name;
-    }
-    if (fields.stocked) {
-      this.savedInventoryStocked = fields.stocked;
-    }
-    if (fields.desc) {
-      this.savedInventoryDesc = fields.desc;
-    }
-    if (fields.location) {
-      this.savedInventoryLocation = fields.location;
-    }
-    if (fields.type) {
-      this.savedInventoryType = fields.type;
-    }
-    if (fields.sortby) {
-      this.savedInventorySortBy = fields.sortby;
-    }
+  updateSavedSearch(fields: {name: string; stocked: number; desc: string; location: string; type: string; sortby: string;}) {
+    //Formerly checked if fields were provided; now required.
+    //Defaults to empty strings and zeros.
+    this.savedInventoryName = fields.name;
+    this.savedInventoryStocked = fields.stocked;
+    this.savedInventoryDesc = fields.desc;
+    this.savedInventoryLocation = fields.location;
+    this.savedInventoryType = fields.type;
+    this.savedInventorySortBy = fields.sortby;
   }
 
   // skipcq: JS-0105

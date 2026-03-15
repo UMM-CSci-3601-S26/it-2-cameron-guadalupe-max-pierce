@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Observable } from 'rxjs';
+//import { Observable } from 'rxjs';
 import { MockInventoryService } from 'src/testing/inventory.service.mock';
-import { InventoryItem } from './inventory_item';
+//import { InventoryItem } from './inventory_item';
 // import { UserCardComponent } from './user-card.component';
 import { InventoryListComponent } from './inventory_list.component';
 import { InventoryService } from './inventory.service';
@@ -45,17 +45,25 @@ describe('User list', () => {
     expect(Array.isArray(items)).toBe(true);
   });
 
+  it('should initialize with filteredItems available', () => {
+    const items = inventoryList.filteredItems();
+    expect(items).toBeDefined();
+    expect(Array.isArray(items)).toBe(true);
+  });
+
   it('should initialize with typeFilteredItems available', () => {
     const typedItems = inventoryList.typeFilteredItems();
     expect(typedItems).toBeDefined();
     expect(Array.isArray(typedItems)).toBe(true);
   });
 
-  it('should call getItems() when itemName signal changes', () => {
+  it('should call getItems() and updateSavedSearch() when itemName signal changes', () => {
     const spy = spyOn(inventoryService, 'getItems').and.callThrough();
+    const doubleAgent = spyOn(inventoryService, 'updateSavedSearch').and.callThrough();
     inventoryList.itemName.set('test');
     fixture.detectChanges();
     expect(spy).toHaveBeenCalledWith({  }); //Since we're not filtering on server, no arguements should be passed.
+    expect(doubleAgent).toHaveBeenCalled();
   });
 
   //Current setup just calls getItems when anything changes. Probably a better way to test this.
