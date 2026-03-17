@@ -97,7 +97,7 @@ export class InventoryListComponent {
       //Not actually doing any filtering on the server, just need to get Items.
       combineLatest([this.itemName$,this.itemStock$,this.itemDesc$,this.itemLocation$,this.itemType$]).pipe(
         switchMap(() =>
-          this.inventoryService.getItems({}) //If we decide to filter on server, args go here
+          this.inventoryService.getItems({}) //If we decide to filter on server, args go her
         ),
         catchError((err) => {
           if (!(err.error instanceof ErrorEvent)) {
@@ -116,6 +116,16 @@ export class InventoryListComponent {
 
   filteredItems = computed(() => {
     const currentItems = this.serverFilteredItems();
+    //Whenever we sort, we also update saved search.
+    //Since this is through service, should be saved between pages.
+    this.inventoryService.updateSavedSearch({
+      name: this.itemName(),
+      stocked: this.itemStock(),
+      desc: this.itemDesc(),
+      location: this.itemLocation(),
+      type: this.itemType(),
+      sortby: this.sortBy()
+    });
     return this.inventoryService.filterItems(currentItems, {
       name: this.itemName(),
       type: this.itemType(),

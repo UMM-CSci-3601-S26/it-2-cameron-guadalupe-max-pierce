@@ -60,6 +60,34 @@ describe('InventoryService', () => {
     httpTestingController.verify();
   });
 
+  describe('Updates saved search terms correctly', () => {
+    //Simple as that. On E2E testing, should make sure this actually persists between pages.
+    it('correctly initializes and updates saved search terms.', () => {
+      //Begins with correct values.
+      expect(inventoryService.savedInventoryName).toEqual('');
+      expect(inventoryService.savedInventoryLocation).toEqual('');
+      expect(inventoryService.savedInventoryType).toEqual('');
+      expect(inventoryService.savedInventoryDesc).toEqual('');
+      expect(inventoryService.savedInventorySortBy).toEqual('');
+      expect(inventoryService.savedInventoryStocked).toEqual(0);
+      //We test elsewhere that the list actually calls this correctly.
+      inventoryService.updateSavedSearch({
+        name:'Test',
+        location:'Over There',
+        type:'other',
+        desc:'This is a test',
+        stocked:2,
+        sortby:'name'
+      });
+      expect(inventoryService.savedInventoryName).toEqual('Test');
+      expect(inventoryService.savedInventoryLocation).toEqual('Over There');
+      expect(inventoryService.savedInventoryType).toEqual('other');
+      expect(inventoryService.savedInventoryDesc).toEqual('This is a test');
+      expect(inventoryService.savedInventorySortBy).toEqual('name');
+      expect(inventoryService.savedInventoryStocked).toEqual(2);
+    });
+  });
+
   describe('When getItems() is called with no parameters', () => {
     it('calls `api/inventory`', waitForAsync(() => {
       // Mock the `httpClient.get()` method, so that instead of making an HTTP request,
