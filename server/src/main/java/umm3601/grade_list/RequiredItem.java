@@ -34,6 +34,8 @@ public class RequiredItem {
   public String type;
   public String desc;
   public int required;
+  public String school;
+  public String grade;
 
   @Override
   public boolean equals(Object obj) {

@@ -54,7 +54,7 @@ public class RequiredItemController implements Controller {
   public RequiredItemController(MongoDatabase database) {
     listCollection = JacksonMongoCollection.builder().build(
         database,
-        "schools", //How to do this nested?
+        "required_items",
         RequiredItem.class,
         UuidRepresentation.STANDARD);
   }

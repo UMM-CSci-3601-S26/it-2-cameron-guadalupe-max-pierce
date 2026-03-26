@@ -4,134 +4,20 @@
       "$oid": "588935f57546a2daea44de7c"
     },
     "name": "Morris Area Elementary School",
-    "grades":
-      {
-        "pre-school":[
-
-        ],
-        "kindergarten": [
-          {
-            "name": "Colored Pencils 16-Pack",
-            "type": "colored_pencils",
-            "desc":"Crayola colored pencils, sharpened. Comes in packs of 16.",
-            "required":12
-          },
-          {
-            "name": "Plastic Kazoo",
-            "type": "other",
-            "desc":"Small plastic kazoo, as loud as possible",
-            "required":1
-          },
-          {
-            "name": "Super Smash Bros Ultimate",
-            "type": "other",
-            "desc":"Copy of the classic nintendo fighting game, collector's edition.",
-            "required":1
-          }
-        ],
-        "1": [
-          {
-            "name": "Colored Pencils 16-Pack",
-            "type": "colored_pencils",
-            "desc":"Crayola colored pencils, sharpened. Comes in packs of 16.",
-            "required":12
-          },
-          {
-            "name": "Plastic Kazoo",
-            "type": "other",
-            "desc":"Small plastic kazoo, as loud as possible",
-            "required":1
-          },
-          {
-            "name": "Final Fantasy IV",
-            "type": "other",
-            "desc":"Square Ennix classic, absolute must.",
-            "required":1
-          }
-        ],
-        "2": [
-
-        ],
-        "3": [
-
-        ],
-        "4": [
-
-        ],
-        "5":[
-
-        ],
-        "6":[
-
-        ],
-        "7":[
-
-        ],
-        "8":[
-
-        ],
-        "9":[
-
-        ],
-        "10":[
-
-        ],
-        "11":[
-
-        ],
-        "12":[
-
-        ]
-      }
+    "display":"MAES"
   },
   {
     "_id": {
       "$oid": "588935f5597715f06f3e8f6c"
     },
     "name": "Hancock Elementary",
-    "grades":{
-       "pre-school":[
-
-        ],
-        "kindergarten": [
-
-        ],
-        "1": [
-
-        ],
-        "2": [
-
-        ],
-        "3": [
-
-        ],
-        "4": [
-
-        ],
-        "5":[
-
-        ],
-        "6":[
-
-        ],
-        "7":[
-
-        ],
-        "8":[
-
-        ],
-        "9":[
-
-        ],
-        "10":[
-
-        ],
-        "11":[
-
-        ],
-        "12":[
-
-        ]
-      }
+    "display":"Hancock"
+  },
+  {
+    "_id": {
+      "$oid": "588935f5597715f06f3e8f6c"
+    },
+    "name": "Saint Mary's Elementary",
+    "display":"Saint Mary's"
   }
 ]
