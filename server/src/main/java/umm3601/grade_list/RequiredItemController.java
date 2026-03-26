@@ -4,9 +4,9 @@ import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 //import static com.mongodb.client.model.Filters.regex;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+// import java.nio.charset.StandardCharsets;
+// import java.security.MessageDigest;
+// import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +31,7 @@ import io.javalin.http.NotFoundResponse;
 import umm3601.Controller;
 
 /**
- * Controller that manages requests for info about users.
+ * Controller that manages requests for info about required items.
  */
 @SuppressWarnings({"MagicNumber"})
 public class RequiredItemController implements Controller {
@@ -241,16 +241,16 @@ public class RequiredItemController implements Controller {
    * ...Wtf is this for?
    * @param str the string to generate a md5 for
    */
-  public String md5(String str) throws NoSuchAlgorithmException {
-    MessageDigest md = MessageDigest.getInstance("MD5");
-    byte[] hashInBytes = md.digest(str.toLowerCase().getBytes(StandardCharsets.UTF_8));
+  // public String md5(String str) throws NoSuchAlgorithmException {
+  //   MessageDigest md = MessageDigest.getInstance("MD5");
+  //   byte[] hashInBytes = md.digest(str.toLowerCase().getBytes(StandardCharsets.UTF_8));
 
-    StringBuilder result = new StringBuilder();
-    for (byte b : hashInBytes) {
-      result.append(String.format("%02x", b));
-    }
-    return result.toString();
-  }
+  //   StringBuilder result = new StringBuilder();
+  //   for (byte b : hashInBytes) {
+  //     result.append(String.format("%02x", b));
+  //   }
+  //   return result.toString();
+  // }
 
   /**
    * @param server The Javalin server instance

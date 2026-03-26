@@ -3,7 +3,7 @@ package umm3601.families;
 import org.mongojack.Id;
 import org.mongojack.ObjectId;
 
-import umm3601.families.Student;
+//import umm3601.families.Student;
 
 @SuppressWarnings({"VisibilityModifier"})
 public class Student {
@@ -12,7 +12,7 @@ public class Student {
   @SuppressWarnings({"MemberName"})
   public String _id;
 
-  public boolean needs_backpack; //True or false
+  public boolean backpack; //If true, student also needs a backpack.
   public String grade; //Just need grade, not name.
   //Tracked as a string to account for kindergarten and preschool.
 

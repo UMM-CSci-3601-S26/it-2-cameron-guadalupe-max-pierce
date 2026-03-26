@@ -6,11 +6,13 @@
     "name": "Richards",
     "time":1200,
     "students":[
-      {"grade":1,
-        "needs_backpack":true
+      {
+        "grade":1,
+        "backpack":true
       },
-      {"grade":3,
-        "needs_backpack":false
+      {
+        "grade":3,
+        "backpack":false
       }
     ]
   },
@@ -21,8 +23,9 @@
     "name": "Smith",
     "time":100,
     "students":[
-      {"grade":2,
-        "needs_backpack":false
+      {
+        "grade":2,
+        "backpack":false
       }
     ]
   }

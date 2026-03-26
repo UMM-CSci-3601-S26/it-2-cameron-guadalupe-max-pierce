@@ -4,9 +4,9 @@ import static com.mongodb.client.model.Filters.and;
 import static com.mongodb.client.model.Filters.eq;
 //import static com.mongodb.client.model.Filters.regex;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+// import java.nio.charset.StandardCharsets;
+// import java.security.MessageDigest;
+// import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +38,7 @@ import umm3601.Controller;
 @SuppressWarnings({"MagicNumber"})
 public class FamilyController implements Controller {
 
-  private static final String API_FAMILIES= "/api/families";
+  private static final String API_FAMILIES = "/api/families";
   private static final String API_FAMILY_BY_ID = "/api/families/{id}";
   // static final String NAME_KEY = "name";
   // static final String TYPE_KEY = "type";
@@ -243,16 +243,16 @@ public class FamilyController implements Controller {
    * ...Wtf is this for? Again? Is this still necessary? It's bringing down our coverage.
    * @param str the string to generate a md5 for
    */
-  public String md5(String str) throws NoSuchAlgorithmException {
-    MessageDigest md = MessageDigest.getInstance("MD5");
-    byte[] hashInBytes = md.digest(str.toLowerCase().getBytes(StandardCharsets.UTF_8));
+  // public String md5(String str) throws NoSuchAlgorithmException {
+  //   MessageDigest md = MessageDigest.getInstance("MD5");
+  //   byte[] hashInBytes = md.digest(str.toLowerCase().getBytes(StandardCharsets.UTF_8));
 
-    StringBuilder result = new StringBuilder();
-    for (byte b : hashInBytes) {
-      result.append(String.format("%02x", b));
-    }
-    return result.toString();
-  }
+  //   StringBuilder result = new StringBuilder();
+  //   for (byte b : hashInBytes) {
+  //     result.append(String.format("%02x", b));
+  //   }
+  //   return result.toString();
+  // }
 
   /**
    * @param server The Javalin server instance
