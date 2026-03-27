@@ -5,16 +5,7 @@
     },
     "name": "Richards",
     "time":1200,
-    "students":[
-      {
-        "grade":1,
-        "backpack":true
-      },
-      {
-        "grade":3,
-        "backpack":false
-      }
-    ]
+    "students":"example_string"
   },
   {
     "_id": {
@@ -22,11 +13,6 @@
     },
     "name": "Smith",
     "time":100,
-    "students":[
-      {
-        "grade":2,
-        "backpack":false
-      }
-    ]
+    "students":"example_string"
   }
 ]
