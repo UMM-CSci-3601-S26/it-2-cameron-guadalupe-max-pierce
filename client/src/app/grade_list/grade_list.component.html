@@ -116,14 +116,16 @@
   <div class="flex-1">
     <!-- The actual inventory list -->
     <div>
-      <mat-card>
-        <mat-card-content>
           @if (sortBy() === "school") {
             <mat-nav-list class="item-nav-list" color="accent">
               @for (school of schoolFilteredItems(); track school.grades) {
+                <mat-card class="section-card">
+                <mat-card-content>
                 <h2 matSubheader>{{ school.school_header }}</h2>
                 <!--Sublist for each item type-->
                 @for (grade of school.grades; track grade.grade_header) {
+                    <mat-card class="sub-section-card">
+                    <mat-card-content>
                     <h3 matSubheader>{{ grade.grade_header }}</h3>
                     @for (item of grade.items; track item._id) {
                       <a mat-list-item [routerLink]="['/inventory', item._id]" class="item-list-item">
@@ -131,13 +133,19 @@
                       <span matListItemLine class="item-list-desc"> {{item.desc}} ~ required for {{item.school}}, {{item.grade}}</span>
                       </a>
                     }
+                    </mat-card-content>
+                    </mat-card>
                 }
+                </mat-card-content>
+                </mat-card>
               }
             </mat-nav-list>
           }
           @else if (sortBy() === "type") { <!-- Special sectioned list for type -->
             <mat-nav-list class="item-nav-list" color="accent">
               @for (collection of typeFilteredItems(); track collection.items) {
+                <mat-card class = "section-card">
+                <mat-card-content>
                 <h2 matSubheader>{{ collection.header }}</h2>
                 <!--Sublist for each item type-->
                 @for (item of collection.items; track item._id) {
@@ -146,10 +154,14 @@
                     <span matListItemLine class="item-list-desc"> {{item.desc}} ~ required for {{item.school}}, {{item.grade}}</span>
                     </a>
                 }
+                </mat-card-content>
+                </mat-card>
               }
             </mat-nav-list>
           }
           @else { <!--Regular, untyped sorting-->
+            <mat-card>
+            <mat-card-content>
             <mat-nav-list class="item-nav-list" color="accent">
               @for (item of filteredItems(); track item._id) {
                   <a mat-list-item [routerLink]="['/inventory', item._id]" class="item-list-item">
@@ -158,9 +170,9 @@
                   </a>
               }
             </mat-nav-list>
+          </mat-card-content>
+          </mat-card>
           }
-        </mat-card-content>
-      </mat-card>
     </div>
   </div>
   } @else {

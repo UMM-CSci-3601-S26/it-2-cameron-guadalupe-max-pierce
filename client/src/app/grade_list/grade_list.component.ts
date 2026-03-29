@@ -276,7 +276,7 @@ export class GradeListComponent {
     // this.inventoryService.modifyMass(tempItem,this.filteredItems());
     //TODO, We need to update something, such that the page doesn't need manual reloading...
     this.snackBar.open(
-      `Grades not actually rest. This is a work in progress.`,
+      `Grades not actually reset. This is a work in progress.`,
       'OK',
       { duration: 6000 }
     );
