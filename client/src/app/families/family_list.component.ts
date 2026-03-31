@@ -69,11 +69,12 @@ export class FamilyListComponent {
   resetVisible = signal<boolean|undefined>(false);//Reset button is initially hidden.
 
   filteredGradeOptions = computed(() => {
-    const input = (this.itemGrade() || '').toLowerCase();
-    if (!input) return this.familyService.gradeOptions;
-    return this.familyService.gradeOptions.filter(option =>
-      option.label.toLowerCase().includes(input) || option.value.toLowerCase().includes(input)
-    );
+    return this.familyService.gradeOptions;
+    // const input = (this.itemGrade() || '').toLowerCase();
+    // if (!input) return this.familyService.gradeOptions;
+    // return this.familyService.gradeOptions.filter(option =>
+    //   option.label.toLowerCase().includes(input) || option.value.toLowerCase().includes(input)
+    // );
   });
 
   //Still not sure what this is doing.

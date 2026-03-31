@@ -84,11 +84,12 @@ export class GradeListComponent {
   };
 
   filteredGradeOptions = computed(() => {
-    const input = (this.itemGrade() || '').toLowerCase();
-    if (!input) return this.gradeListService.gradeOptions;
-    return this.gradeListService.gradeOptions.filter(option =>
-      option.label.toLowerCase().includes(input) || option.value.toLowerCase().includes(input)
-    );
+    return this.gradeListService.gradeOptions;
+    // const input = (this.itemGrade() || '').toLowerCase();
+    // if (!input) return this.gradeListService.gradeOptions;
+    // return this.gradeListService.gradeOptions.filter(option =>
+    //   option.label.toLowerCase().includes(input) || option.value.toLowerCase().includes(input)
+    // );
   });
 
   displayGradeLabel = (value: string | null): string => {
@@ -264,21 +265,21 @@ export class GradeListComponent {
     );
   }
 
-  resetLocations() {
-    // const tempItem: InventoryItem = {
-    //   _id:undefined,
-    //   location:"N/A",
-    //   stocked:undefined,
-    //   name:undefined,
-    //   type:undefined,
-    //   desc:undefined
-    // }
-    // this.inventoryService.modifyMass(tempItem,this.filteredItems());
-    //TODO, We need to update something, such that the page doesn't need manual reloading...
-    this.snackBar.open(
-      `Grades not actually reset. This is a work in progress.`,
-      'OK',
-      { duration: 6000 }
-    );
-  }
+  // resetLocations() {
+  //   // const tempItem: InventoryItem = {
+  //   //   _id:undefined,
+  //   //   location:"N/A",
+  //   //   stocked:undefined,
+  //   //   name:undefined,
+  //   //   type:undefined,
+  //   //   desc:undefined
+  //   // }
+  //   // this.inventoryService.modifyMass(tempItem,this.filteredItems());
+  //   //TODO, We need to update something, such that the page doesn't need manual reloading...
+  //   this.snackBar.open(
+  //     `Grades not actually reset. This is a work in progress.`,
+  //     'OK',
+  //     { duration: 6000 }
+  //   );
+  // }
 }

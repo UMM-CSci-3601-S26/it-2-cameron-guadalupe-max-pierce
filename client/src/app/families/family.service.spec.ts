@@ -134,6 +134,25 @@ describe('FamilyService', () => {
     }));
   });
 
+  describe('When getSchools() is called', () => {
+    it('calls `api/families`', waitForAsync(() => {
+      // Mock the `httpClient.get()` method, so that instead of making an HTTP request,
+      // it just returns our test data.
+      const mockedMethod = spyOn(httpClient, 'get').and.returnValue(of(undefined));
+
+      familyService.getSchools().subscribe(() => {
+        // The mocked method (`httpClient.get()`) should have been called
+        // exactly one time.
+        expect(mockedMethod)
+          .withContext('one call')
+          .toHaveBeenCalledTimes(1);
+        expect(mockedMethod)
+          .withContext('talks to the correct endpoint')
+          .toHaveBeenCalledWith(familyService.schoolUrl);
+      });
+    }));
+  });
+
   describe('When getFamilies() is called with parameters, it correctly forms the HTTP request (Javalin/Server filtering)', () => {
     it('correctly calls api/users with filter parameter \'Test\'', () => {
       const mockedMethod = spyOn(httpClient, 'get').and.returnValue(of(testFamilies));
@@ -226,6 +245,20 @@ describe('FamilyService', () => {
       filteredItems.forEach(item => {
         expect(item.name.indexOf(itemName)).toBeGreaterThanOrEqual(0);
       });
+    });
+
+    it('filters by grade', () => {
+      const gradeName = 'P';
+      const filteredItems = familyService.filterFamilies(testFamilies, { grade: gradeName });
+      // There should be two families with preschoolers
+      expect(filteredItems.length).toBe(2);
+    });
+
+    it('filters by school', () => {
+      const schoolName = 'MAES';
+      const filteredItems = familyService.filterFamilies(testFamilies, { school: schoolName });
+      //2 Families have students at MAES
+      expect(filteredItems.length).toBe(2);
     });
 
     it('filters by time', () => {

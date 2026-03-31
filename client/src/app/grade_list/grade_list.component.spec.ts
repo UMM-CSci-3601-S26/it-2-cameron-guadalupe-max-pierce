@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-//import { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { MockGradeListService } from 'src/testing/grade_list.service.mock';
 import { GradeListComponent } from './grade_list.component';
 import { GradeListService } from './grade_list.service';
+import { RequiredItem } from './required_item';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
@@ -45,6 +46,18 @@ describe('Grade List', () => {
 
   it('should initialize with filteredItems available', () => {
     const items = gradeList.filteredItems();
+    expect(items).toBeDefined();
+    expect(Array.isArray(items)).toBe(true);
+  });
+
+  it('should initialize with filteredTypeOptions available', () => {
+    const items = gradeList.filteredTypeOptions();
+    expect(items).toBeDefined();
+    expect(Array.isArray(items)).toBe(true);
+  });
+
+  it('should initialize with filteredGradeOptions available', () => {
+    const items = gradeList.filteredGradeOptions();
     expect(items).toBeDefined();
     expect(Array.isArray(items)).toBe(true);
   });
@@ -98,4 +111,60 @@ describe('Grade List', () => {
   //     originalItems
   //   );
   // });
+});
+
+describe('Misbehaving Grade List', () => {
+  let itemList: GradeListComponent;
+  let fixture: ComponentFixture<GradeListComponent>;
+
+  let inventoryServiceStub: {
+    getItems: () => Observable<RequiredItem[]>;
+    filterItems: () => RequiredItem[];
+    updateSavedSearch: () => undefined;
+  };
+
+  beforeEach(() => {
+    // stub UserService for test purposes
+    inventoryServiceStub = {
+      getItems: () =>
+        new Observable((observer) => {
+          observer.error('getItems() Observer generates an error');
+        }),
+      filterItems: () => [],
+      updateSavedSearch: () => undefined
+    };
+  });
+  //Still no idea what this is doing, whatever
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        GradeListComponent
+      ],
+      providers: [{
+        provide: GradeListService,
+        useValue: inventoryServiceStub
+      }, provideRouter([])],
+    })
+      .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(GradeListComponent);
+    itemList = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it("generates an error if we don't set up a GradeListService", () => {
+    // If the service fails, we expect the `serverFilteredUsers` signal to
+    // be an empty array of users.
+    expect(itemList.serverFilteredItems())
+      .withContext("service can't give values to the list if it's not there")
+      .toEqual([]);
+    // We also expect the `errMsg` signal to contain the "Problem contacting…"
+    // error message. (It's arguably a bit fragile to expect something specific
+    // like this; maybe we just want to expect it to be non-empty?)
+    expect(itemList.errMsg())
+      .withContext('the error message will be')
+      .toContain('Problem contacting the server – Error Code:');
+  });
 });

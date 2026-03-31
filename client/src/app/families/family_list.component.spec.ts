@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-//import { Observable } from 'rxjs';
+import { Observable } from 'rxjs';
+import { Family } from './family';
 import { MockFamilyService } from 'src/testing/family.service.mock';
 import { FamilyListComponent } from './family_list.component';
 import { FamilyService } from './family.service';
@@ -49,6 +50,12 @@ describe('Family list', () => {
     expect(Array.isArray(items)).toBe(true);
   });
 
+  it('should initialize with filteredGradeOptions available', () => {
+    const items = familyList.filteredGradeOptions();
+    expect(items).toBeDefined();
+    expect(Array.isArray(items)).toBe(true);
+  });
+
   it('should initialize with gradeFilteredItems available', () => {
     const gradedItems = familyList.gradeFilteredFamilies();
     expect(gradedItems).toBeDefined();
@@ -59,6 +66,12 @@ describe('Family list', () => {
     const schooledItems = familyList.schoolFilteredFamilies();
     expect(schooledItems).toBeDefined();
     expect(Array.isArray(schooledItems)).toBe(true);
+  });
+
+  it('should initialize with gradeAndSchoolFilteredFamilies available', () => {
+    const paritionedItems = familyList.gradeAndSchoolFilteredFamilies();
+    expect(paritionedItems).toBeDefined();
+    expect(Array.isArray(paritionedItems)).toBe(true);
   });
 
   it('should call getFamilies() and updateSavedSearch() when itemName signal changes', () => {
@@ -99,4 +112,64 @@ describe('Family list', () => {
   //     originalItems
   //   );
   // });
+});
+
+describe('Misbehaving Family List', () => {
+  let familyList: FamilyListComponent;
+  let fixture: ComponentFixture<FamilyListComponent>;
+
+  let familyServiceStub: {
+    getFamilies: () => Observable<Family[]>;
+    filterFamilies: () => Family[];
+    updateSavedSearch: () => undefined;
+  };
+
+  beforeEach(() => {
+    // stub FamilyService for test purposes
+    familyServiceStub = {
+      getFamilies: () =>
+        new Observable((observer) => {
+          observer.error('getFamilies() Observer generates an error');
+        }),
+      updateSavedSearch:  () => undefined,
+      filterFamilies: () => []
+    };
+  });
+
+  // Construct the `userList` used for the testing in the `it` statement
+  // below.
+  beforeEach(waitForAsync(() => {
+    TestBed.configureTestingModule({
+      imports: [
+        FamilyListComponent
+      ],
+      // providers:    [ UserService ]  // NO! Don't provide the real service!
+      // Provide a test-double instead
+      providers: [{
+        provide: FamilyService,
+        useValue: familyServiceStub
+      }, provideRouter([])],
+    })
+      .compileComponents();
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(FamilyListComponent);
+    familyList = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it("generates an error if we don't set up a FamilyListService", () => {
+    // If the service fails, we expect the `serverFilteredUsers` signal to
+    // be an empty array of users.
+    expect(familyList.serverFilteredItems())
+      .withContext("service can't give values to the list if it's not there")
+      .toEqual([]);
+    // We also expect the `errMsg` signal to contain the "Problem contacting…"
+    // error message. (It's arguably a bit fragile to expect something specific
+    // like this; maybe we just want to expect it to be non-empty?)
+    expect(familyList.errMsg())
+      .withContext('the error message will be')
+      .toContain('Problem contacting the server – Error Code:');
+  });
 });

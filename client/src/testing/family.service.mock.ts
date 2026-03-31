@@ -33,6 +33,11 @@ export class MockFamilyService implements Pick<FamilyService, 'getFamilies' | 'f
       "_id": "hancock_id",
       "value": "Hancock Elementary",
       "label":"Hancock"
+    },
+    {
+      "_id": "saint_mary's_id",
+      "value": "Saint Mary's Elementary",
+      "label":"Saint Mary's"
     }
   ];
 
