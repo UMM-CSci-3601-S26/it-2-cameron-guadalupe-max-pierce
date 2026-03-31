@@ -2,8 +2,6 @@ import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 //import { Observable } from 'rxjs';
 import { MockGradeListService } from 'src/testing/grade_list.service.mock';
-//import { InventoryItem } from './inventory_item';
-// import { UserCardComponent } from './user-card.component';
 import { GradeListComponent } from './grade_list.component';
 import { GradeListService } from './grade_list.service';
 import { provideHttpClient } from '@angular/common/http';

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { AppComponent } from 'src/app/app.component';
 import { Family } from '../app/families/family';
+import { School } from '../app/grade_list/school';
 import { FamilyService } from 'src/app/families/family.service';
 
 /**
@@ -14,13 +15,26 @@ import { FamilyService } from 'src/app/families/family.service';
 })
 
 //'modifyMass'
-export class MockFamilyService implements Pick<FamilyService, 'getFamilies' | 'filterFamilies' | 'addFamily' | 'deleteFamily'| 'updateSavedSearch'> {
+export class MockFamilyService implements Pick<FamilyService, 'getFamilies' | 'filterFamilies' | 'addFamily' | 'deleteFamily'| 'updateSavedSearch'|'getSchools'> {
   savedFamilyName = ''; //Per-session saved value for name search bar.
   savedFamilySchool = '';
   savedFamilyGrade = '';
   savedFamilyStudents = 0;
   savedFamilyTime = '';
   savedFamilySortBy = ''; //Per-session saved value for sort-order search bar.
+
+  static testSchools: School[] = [
+    {
+      "_id": "maes_id",
+      "value": "Morris Area Elementary School",
+      "label":"MAES"
+    },
+    {
+      "_id": "hancock_id",
+      "value": "Hancock Elementary",
+      "label":"Hancock"
+    }
+  ];
 
   static testItems: Family[] = [
     {
@@ -105,6 +119,10 @@ export class MockFamilyService implements Pick<FamilyService, 'getFamilies' | 'f
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getFamilies(_filters: { name?: string; stocked?: number; desc?: string; location?: string; type?: string;}): Observable<Family[]> {
     return of(MockFamilyService.testItems);
+  }
+
+  getSchools(): Observable<School[]> {
+    return of(MockFamilyService.testSchools);
   }
 
   //Probably unessesary

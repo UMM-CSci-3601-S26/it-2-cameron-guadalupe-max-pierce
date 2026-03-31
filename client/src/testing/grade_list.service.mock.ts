@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { AppComponent } from 'src/app/app.component';
 import { RequiredItem } from '../app/grade_list/required_item';
+import { School } from '../app/grade_list/school';
 import { GradeListService } from 'src/app/grade_list/grade_list.service';
 
 /**
@@ -12,7 +13,7 @@ import { GradeListService } from 'src/app/grade_list/grade_list.service';
 @Injectable({
   providedIn: AppComponent
 })
-export class MockGradeListService implements Pick<GradeListService, 'getItems' | 'filterItems' | 'addItem' | 'deleteItem'| 'updateSavedSearch'| 'modifyMass'> {
+export class MockGradeListService implements Pick<GradeListService, 'getItems' | 'filterItems' | 'addItem' | 'deleteItem'| 'updateSavedSearch'| 'modifyMass'|'getSchools'> {
   savedInventoryName = ''; //Per-session saved value for name search bar.
   savedInventoryGrade = ''; //Per-session saved value for location search bar.
   savedInventorySchool = ''; //Per-session saved value for location search bar.
@@ -20,6 +21,19 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
   savedInventoryType = ''; //Per-session saved value for type search bar.
   savedInventoryDesc = ''; //Per-session saved value for description search bar.
   savedInventorySortBy = ''; //Per-session saved value for sort-order search bar.
+
+  static testSchools: School[] = [
+    {
+      "_id": "maes_id",
+      "value": "Morris Area Elementary School",
+      "label":"MAES"
+    },
+    {
+      "_id": "hancock_id",
+      "value": "Hancock Elementary",
+      "label":"Hancock"
+    }
+  ];
 
   static testItems: RequiredItem[] = [
     {
@@ -84,6 +98,10 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getItems(_filters: { name?: string; stocked?: number; desc?: string; location?: string; type?: string;}): Observable<RequiredItem[]> {
     return of(MockGradeListService.testItems);
+  }
+
+  getSchools(): Observable<School[]> {
+    return of(MockGradeListService.testSchools);
   }
 
   //Probably unessesary

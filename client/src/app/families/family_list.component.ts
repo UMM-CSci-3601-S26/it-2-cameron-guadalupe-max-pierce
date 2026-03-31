@@ -32,7 +32,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
  * makes the most sense to do the filtering.
  */
 @Component({
-  selector: 'app-inventory-list-component',
+  selector: 'app-family-list-component',
   templateUrl: 'family_list.component.html',
   styleUrls: ['./family_list.component.scss'],
   providers: [],

@@ -32,7 +32,7 @@ import { School } from './school';
  * makes the most sense to do the filtering.
  */
 @Component({
-  selector: 'app-inventory-list-component',
+  selector: 'app-grade-list-component',
   templateUrl: 'grade_list.component.html',
   styleUrls: ['./grade_list.component.scss'],
   providers: [],
