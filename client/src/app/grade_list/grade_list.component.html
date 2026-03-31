@@ -126,9 +126,9 @@
                 <button mat-raised-button
                   type="button"
                   color="accent"
-                  type="back"
                   [style.height.px]=30
                   data-test="populateButtonSchool"
+                  (click)="populateInventory(school.school_val)"
                 >
                 Add all requirements to Inventory
                 </button>
@@ -143,9 +143,9 @@
                       <button mat-raised-button
                         type="button"
                         color="accent"
-                        type="back"
                         [style.height.px]=30
                         data-test="populateButton"
+                        (click)="populateInventory(school.school_val,grade.grade_val)"
                       >
                       Add {{grade.grade_header}} requirements to Inventory
                       </button>

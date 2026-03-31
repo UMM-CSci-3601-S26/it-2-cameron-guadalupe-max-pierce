@@ -14,6 +14,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { catchError, combineLatest, of, switchMap, tap } from 'rxjs';
 import { RequiredItem } from './required_item';
+import { InventoryItem } from '../inventory/inventory_item';
 //import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 //import { InventoryCardComponent } from './inventory_card.component';
 import { GradeListService } from './grade_list.service';
@@ -214,8 +215,10 @@ export class GradeListComponent {
     //Doubly nested- contains an array of school headers and grades; grades contains an array of grade_headers and items arrays.
     const schooledArray: {
       school_header: string,
+      school_val: string,
       grades: {
         grade_header:string,
+        grade_val:string,
         items:RequiredItem[]
       }[];
     }[] = [];
@@ -242,7 +245,8 @@ export class GradeListComponent {
         })
         if (matchingItems.length > 0) {
           matchingGrades.push({
-            grade_header: this.gradeListService.gradeOptions[g].label,
+            grade_header: this.gradeListService.gradeOptions[g].label, //This is gonna keep bugging me...
+            grade_val: this.gradeListService.gradeOptions[g].value,
             items: matchingItems
           })
         }
@@ -251,6 +255,7 @@ export class GradeListComponent {
       if (matchingGrades.length > 0) {
         schooledArray.push({
           school_header: this.serverFilteredSchools()[s].value,
+          school_val: this.serverFilteredSchools()[s].label,
           grades: matchingGrades
         })
       }
@@ -268,6 +273,57 @@ export class GradeListComponent {
     );
   }
 
+  populateInventory(school_val: string, grade_val?: string) {
+    let popArray: RequiredItem[] = [];
+    let itemCount = 0;
+    if (grade_val) {
+      popArray = this.gradeListService.filterItems(this.serverFilteredItems(),{school:school_val,grade:grade_val});
+    } else {
+      popArray = this.gradeListService.filterItems(this.serverFilteredItems(),{school:school_val});
+    }
+    for (let i = 0; i < popArray.length; i ++) {
+      const newItem: InventoryItem = {
+        _id: undefined,
+        name:popArray[i].name,
+        type:popArray[i].type,
+        location:'N/A',
+        stocked:0,
+        desc:popArray[i].desc,
+      }
+      //Add each item.
+      this.gradeListService.addItemToInventory(newItem).subscribe({
+        next: () => {},
+        error: err => { //None of these should occur, since these items were already legally added. ...But just in case...
+          if (err.status === 400) {
+            this.snackBar.open(
+              `Tried to add an illegal new item – Error Code: ${err.status}\nMessage: ${err.message}`,
+              'OK',
+              { duration: 5000 }
+            );
+          } else if (err.status === 500) {
+            this.snackBar.open(
+              `The server failed to process your request to add a new item. Is the server up? – Error Code: ${err.status}\nMessage: ${err.message}`,
+              'OK',
+              { duration: 5000 }
+            );
+          } else {
+            this.snackBar.open(
+              `An unexpected error occurred – Error Code: ${err.status}\nMessage: ${err.message}`,
+              'OK',
+              { duration: 5000 }
+            );
+          }
+        },
+      });
+      //Increment counter for final message.
+      itemCount ++;
+    }
+    this.snackBar.open(
+      `Added x${itemCount.toString()} Items from ${school_val}, ${grade_val} to Inventory`,
+      'OK',
+      { duration: 6000 }
+    );
+  }
   // resetLocations() {
   //   // const tempItem: InventoryItem = {
   //   //   _id:undefined,

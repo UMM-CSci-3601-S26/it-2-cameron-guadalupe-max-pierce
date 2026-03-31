@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { RequiredItem } from './required_item';
+import { InventoryItem } from '../inventory/inventory_item';
 import { School } from './school';
 import { InventoryService } from '../inventory/inventory.service';
 import { FamilyService } from '../families/family.service';
@@ -28,7 +29,8 @@ export class GradeListService {
   private httpClient = inject(HttpClient);
 
   // The URL for the users part of the server API.
-  readonly inventoryUrl: string = `${environment.apiUrl}grade_list`;
+  readonly inventoryUrl: string = `${environment.apiUrl}inventory`;
+  readonly gradeListUrl: string = `${environment.apiUrl}grade_list`;
   readonly schoolUrl: string = `${environment.apiUrl}schools`;
   //readonly usersByCompanyUrl: string = `${environment.apiUrl}usersByCompany`;
 
@@ -38,6 +40,8 @@ export class GradeListService {
   private readonly requiredKey = 'required';
   private readonly gradeKey = 'grade';
   private readonly schoolKey = 'school';
+  private readonly locationKey = 'location';
+  private readonly stockedKey = 'stocked';
 
   savedGradeListName = ''; //Per-session saved value for name search bar.
   savedGradeListRequired = 0; //Per-session saved value for stocked search bar.
@@ -112,7 +116,34 @@ export class GradeListService {
     }
     // Send the HTTP GET request with the given URL and parameters.
     // That will return the desired `Observable<InventoryItem[]>`.
-    return this.httpClient.get<RequiredItem[]>(this.inventoryUrl, {
+    return this.httpClient.get<RequiredItem[]>(this.gradeListUrl, {
+      params: httpParams,
+    });
+  }
+
+  getItemsFromInventory(filters?: { name?: string; stocked?: number; desc?: string; location?: string; type?: string; }): Observable<InventoryItem[]> {
+    // Necessary to check if populating items are already present.
+    let httpParams: HttpParams = new HttpParams();
+    if (filters) {
+      if (filters.name) {
+        httpParams = httpParams.set(this.nameKey, filters.name);
+      }
+      if (filters.stocked) {
+        httpParams = httpParams.set(this.stockedKey, filters.stocked.toString());
+      }
+      if (filters.location) {
+        httpParams = httpParams.set(this.locationKey, filters.location);
+      }
+      if (filters.desc) {
+        httpParams = httpParams.set(this.descKey, filters.desc);
+      }
+      if (filters.type) {
+        httpParams = httpParams.set(this.typeKey, filters.type);
+      }
+    }
+    // Send the HTTP GET request with the given URL and parameters.
+    // That will return the desired `Observable<InventoryItem[]>`.
+    return this.httpClient.get<InventoryItem[]>(this.inventoryUrl, {
       params: httpParams,
     });
   }
@@ -130,7 +161,7 @@ export class GradeListService {
    */
   getItemById(id: string): Observable<RequiredItem> {
     // The input to get could also be written as (this.userUrl + '/' + id)
-    return this.httpClient.get<RequiredItem>(`${this.inventoryUrl}/${id}`);
+    return this.httpClient.get<RequiredItem>(`${this.gradeListUrl}/${id}`);
   }
 
   /**
@@ -211,12 +242,23 @@ export class GradeListService {
   addItem(newItem: Partial<RequiredItem>): Observable<string> {
     // Send post request to add a new item with the item data as the body.
     // `res.id` should be the MongoDB ID of the newly added `Item`.
+    return this.httpClient.post<{id: string}>(this.gradeListUrl, newItem).pipe(map(response => response.id));
+  }
+  addItemToInventory(newItem: Partial<InventoryItem>): Observable<string> {
+    // Send post request to add a new item to the INVENTORY.
+    // `res.id` should be the MongoDB ID of the newly added `Item`.
     return this.httpClient.post<{id: string}>(this.inventoryUrl, newItem).pipe(map(response => response.id));
   }
 
   deleteItem(id: string): Observable<RequiredItem> {
-    return this.httpClient.delete<RequiredItem>(`${this.inventoryUrl}/${id}`);
+    return this.httpClient.delete<RequiredItem>(`${this.gradeListUrl}/${id}`);
   }
+
+  // alreadyInInventory(name_comp: string, desc_comp: string) {
+  //   //Checks if provided item is already present in inventory
+  //   //const matchingItems = this.getItemsFromInventory({name:name_comp, desc:desc_comp})
+  //   //How to get length?
+  // }
 
   modifyMass(newProps:RequiredItem,oldItems:RequiredItem[]) {
     //We first need to copy the items into a new array. oldItems is connected to a signal or something.
