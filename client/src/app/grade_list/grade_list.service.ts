@@ -174,6 +174,7 @@ export class GradeListService {
         switchMap(() =>
           this.getItemsFromInventory({}) //If we decide to filter on server, args go her
         ),
+        //How TF to test for this?
         catchError((err) => {
           if (!(err.error instanceof ErrorEvent)) {
             this.errMsg.set(
@@ -188,15 +189,15 @@ export class GradeListService {
       )
     );
 
-  alreadyInInventory(name_comp: string, desc_comp: string): boolean {
-    const filteredItems = this.inventoryReference();
+  alreadyInInventory( newItem: RequiredItem, inventory: InventoryItem[]): boolean {
+    const filteredItems = inventory;//this.inventoryReference();
     let retVal = false;
     let returnMessage = '';
     //Works, but only if the page is reloaded after each press...
     for (let i = 0; i < filteredItems.length; i ++) {
       returnMessage = returnMessage.concat(" ~ ", filteredItems[i].name.toLowerCase());
-      if ((filteredItems[i].name.toLowerCase().indexOf(name_comp.toLowerCase()) !== -1)
-      && (filteredItems[i].desc.toLowerCase().indexOf(desc_comp.toLowerCase()) !== -1)) {
+      if ((filteredItems[i].name.toLowerCase().indexOf(newItem.name.toLowerCase()) !== -1)
+      && (filteredItems[i].desc.toLowerCase().indexOf(newItem.desc.toLowerCase()) !== -1)) {
         retVal = true;
       }
     }

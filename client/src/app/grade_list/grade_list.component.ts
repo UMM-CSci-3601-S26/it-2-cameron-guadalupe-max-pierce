@@ -301,7 +301,7 @@ export class GradeListComponent {
         desc:popArray[i].desc,
       }
       //Check and Add each item. For some reason alreadyInInventory breaks shit.
-      if (this.gradeListService.alreadyInInventory(newItem.name,newItem.desc)) {
+      if (this.gradeListService.alreadyInInventory(popArray[i],this.gradeListService.inventoryReference())) {
         duplicateCount ++;
       } else {
         this.gradeListService.addItemToInventory(newItem).subscribe({
