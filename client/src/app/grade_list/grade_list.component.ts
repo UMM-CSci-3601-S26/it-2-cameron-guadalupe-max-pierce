@@ -293,7 +293,7 @@ export class GradeListComponent {
     }
     for (let i = 0; i < popArray.length; i ++) {
       newItem = {
-        _id: undefined,
+        _id: '',
         name:popArray[i].name,
         type:popArray[i].type,
         location:'N/A',

@@ -93,6 +93,11 @@ describe('Grade List', () => {
     expect(gradeList.resetVisible()).toEqual(true);
   });
 
+  it("correctly populates the inventory with items from grade list", () => {
+    expect(gradeList.populateAllowed).toBeTrue();
+    gradeList.populateInventory("MAES","K");
+    expect(gradeList.populateAllowed).toBeFalse();
+  });
   //Irrellevant; eventually add a test for clearing the grade list.
   // it("calls the service with correct parameters for location reset", () => {
   //   const spy = spyOn(inventoryService, 'modifyMass').and.callThrough();
