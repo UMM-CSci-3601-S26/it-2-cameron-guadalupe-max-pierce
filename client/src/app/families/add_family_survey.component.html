@@ -1,0 +1,60 @@
+<div class="survey-list-container">
+  <h1>Backpack Need Survey</h1>
+  <form (ngSubmit)="submitSurvey()" #surveyForm="ngForm">
+    <mat-card class="survey-card">
+      <mat-card-header>
+        <mat-card-title>Family Survey</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="flex-row gap-8 flex-wrap">
+          <mat-form-field class="input-field">
+            <input matInput placeholder="Family Last Name" [(ngModel)]="surveyFamilyLastName" name="familyLastName" required>
+            <mat-hint>Family last name</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field class="input-field">
+            <input matInput placeholder="Child First Name" [(ngModel)]="surveyChildFirstName" name="childFirstName" required>
+            <mat-hint>Child first name</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field class="input-field">
+            <input matInput placeholder="School" [(ngModel)]="surveySchool" name="school" required>
+            <mat-hint>Child's school</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field class="input-field">
+            <mat-label>Grade</mat-label>
+            <mat-select [(ngModel)]="surveyGrade" name="grade" required>
+              <mat-option value="K">K</mat-option>
+              <mat-option value="1">1</mat-option>
+              <mat-option value="2">2</mat-option>
+              <mat-option value="3">3</mat-option>
+              <mat-option value="4">4</mat-option>
+              <mat-option value="5">5</mat-option>
+              <mat-option value="6">6</mat-option>
+              <mat-option value="7">7</mat-option>
+              <mat-option value="8">8</mat-option>
+              <mat-option value="9">9</mat-option>
+              <mat-option value="10">10</mat-option>
+              <mat-option value="11">11</mat-option>
+              <mat-option value="12">12</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="radio-group">
+            <label>Needs backpack?</label>
+            <mat-radio-group [(ngModel)]="surveyBackpackNeeded" name="backpackNeeded" required>
+              <mat-radio-button value="yes">Yes</mat-radio-button>
+              <mat-radio-button value="no">No</mat-radio-button>
+            </mat-radio-group>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <div class="form-actions">
+      <button mat-raised-button color="primary" type="submit" [disabled]="!surveyForm.form.valid">Submit Survey</button>
+      <button mat-button type="button" (click)="resetSurvey()">Reset Form</button>
+    </div>
+  </form>
+</div>

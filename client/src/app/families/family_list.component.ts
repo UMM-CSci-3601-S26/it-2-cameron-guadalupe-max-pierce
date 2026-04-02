@@ -11,6 +11,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { RouterLink } from '@angular/router';
 import { catchError, combineLatest, of, switchMap, tap } from 'rxjs';
 import { Family } from './family';
@@ -45,6 +46,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatAutocompleteModule,
     MatOptionModule,
     MatRadioModule,
+    MatCheckboxModule,
     // MatTableModule,
     //InventoryCardComponent,
     MatListModule,
@@ -67,6 +69,7 @@ export class FamilyListComponent {
   itemTime = signal<string|undefined>(this.familyService.savedFamilyTime);
   sortBy = signal<string|undefined>(this.familyService.savedFamilySortBy); //When undefined, sorts by name.
   resetVisible = signal<boolean|undefined>(false);//Reset button is initially hidden.
+
 
   filteredGradeOptions = computed(() => {
     return this.familyService.gradeOptions;
@@ -306,6 +309,7 @@ export class FamilyListComponent {
       { duration: 6000 }
     );
   }
+
 
   //Not relevant for families? Will still want a clear all families button.
   // resetLocations() {

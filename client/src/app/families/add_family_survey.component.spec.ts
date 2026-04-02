@@ -1,0 +1,43 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FormsModule } from '@angular/forms';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
+import { MatButtonModule } from '@angular/material/button';
+import { BackpackSurveyComponent } from './add_family_survey.component';
+
+describe('BackpackSurveyComponent', () => {
+  let component: BackpackSurveyComponent;
+  let fixture: ComponentFixture<BackpackSurveyComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      declarations: [ BackpackSurveyComponent ],
+      imports: [
+        FormsModule,
+        NoopAnimationsModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatRadioModule,
+        MatButtonModule
+      ]
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(BackpackSurveyComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should reset the form when resetSurvey is called', () => {
+    component.surveyFamilyLastName = 'Smith';
+    component.resetSurvey();
+    expect(component.surveyFamilyLastName).toBe('');
+  });
+});

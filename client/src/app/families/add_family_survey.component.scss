@@ -1,0 +1,50 @@
+.survey-list-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+
+  h1 {
+    color: #333;
+    margin-bottom: 20px;
+  }
+}
+
+.survey-card {
+  margin-bottom: 20px;
+}
+
+.flex-row {
+  display: flex;
+  align-items: center;
+}
+
+.gap-8 {
+  gap: 32px; // Standard spacing
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
+}
+
+.input-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
