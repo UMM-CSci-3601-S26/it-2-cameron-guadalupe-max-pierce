@@ -60,6 +60,7 @@ describe('Family list', () => {
     const gradedItems = familyList.gradeFilteredFamilies();
     expect(gradedItems).toBeDefined();
     expect(Array.isArray(gradedItems)).toBe(true);
+    expect(gradedItems.length).toBe(14); //Based on mock service test data.
   });
 
   it('should initialize with schoolFilteredFamilies available', () => {

@@ -11,7 +11,7 @@ import { FamilyService } from '../families/family.service';
 import { toSignal, toObservable} from '@angular/core/rxjs-interop';
 //import { catchError, combineLatest, of, switchMap, tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { catchError, combineLatest, of, switchMap, tap } from 'rxjs';
+import { combineLatest, switchMap, tap } from 'rxjs';
 //import { Company } from '../company-list/company';
 //import { Signal } from '@angular/core/rxjs-interop';
 
@@ -174,20 +174,17 @@ export class GradeListService {
         switchMap(() =>
           this.getItemsFromInventory({}) //If we decide to filter on server, args go her
         ),
-        //How TF to test for this?
-        catchError((err) => {
-          if (!(err.error instanceof ErrorEvent)) {
-            this.errMsg.set(
-              `Problem contacting the server – Error Code: ${err.status}\nMessage: ${err.message}`
-            );
-          }
-          this.snackBar.open(this.errMsg(), 'OK', { duration: 6000 });
-          return of<InventoryItem[]>([]);
-        }),
         tap(() => {
         })
       )
     );
+
+  reloadPage() { //Not really a good way to test this.
+    setTimeout(() => {
+      window.location.reload();
+      //Why on Earth does it need such a long delay to handle this???
+    }, 3500);
+  }
 
   alreadyInInventory( newItem: RequiredItem, inventory: InventoryItem[]): boolean {
     const filteredItems = inventory;//this.inventoryReference();

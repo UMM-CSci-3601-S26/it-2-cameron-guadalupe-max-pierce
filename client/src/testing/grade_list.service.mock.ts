@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { AppComponent } from 'src/app/app.component';
 import { RequiredItem } from '../app/grade_list/required_item';
+import { InventoryItem } from '../app/inventory/inventory_item';
 import { School } from '../app/grade_list/school';
 import { GradeListService } from 'src/app/grade_list/grade_list.service';
 
@@ -13,7 +14,7 @@ import { GradeListService } from 'src/app/grade_list/grade_list.service';
 @Injectable({
   providedIn: AppComponent
 })
-export class MockGradeListService implements Pick<GradeListService, 'getItems' | 'filterItems' | 'addItem' | 'deleteItem'| 'updateSavedSearch'| 'modifyMass'|'getSchools'> {
+export class MockGradeListService implements Pick<GradeListService, 'getItems' | 'filterItems' | 'addItem' | 'addItemToInventory' | 'deleteItem'| 'updateSavedSearch'| 'modifyMass'|'getSchools'|'reloadPage'|'alreadyInInventory'> {
   savedInventoryName = ''; //Per-session saved value for name search bar.
   savedInventoryGrade = ''; //Per-session saved value for location search bar.
   savedInventorySchool = ''; //Per-session saved value for location search bar.
@@ -97,12 +98,23 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
     this.savedInventorySortBy = fields.sortby;
   }
 
+  alreadyInInventory( newItem: RequiredItem, inventory: InventoryItem[]): boolean {
+    if (newItem && inventory) {
+      return false;
+    }
+    return true;
+  }
+
   // skipcq: JS-0105
   // It's OK that the `_filters` argument isn't used here, so we'll disable
   // this warning for just his function.
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getItems(_filters: { name?: string; stocked?: number; desc?: string; location?: string; type?: string;}): Observable<RequiredItem[]> {
     return of(MockGradeListService.testItems);
+  }
+
+  reloadPage() {
+    //Do nothing!
   }
 
   getSchools(): Observable<School[]> {
@@ -127,6 +139,12 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
 
   //Todo
   addItem(item: Partial<RequiredItem>): Observable<string> {
+    // Send post request to add a new item with the item data as the body.
+    // `res.id` should be the MongoDB ID of the newly added `Item`.
+    return of('');
+  }
+
+  addItemToInventory(item: Partial<InventoryItem>): Observable<string> {
     // Send post request to add a new item with the item data as the body.
     // `res.id` should be the MongoDB ID of the newly added `Item`.
     return of('');

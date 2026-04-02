@@ -88,7 +88,6 @@ describe('GradeListService', () => {
   // requests were made to ensure that we're making the correct requests.
   let httpClient: HttpClient;
   //let httpTestingController: HttpTestingController;
-
   beforeEach(() => {
     // Set up the mock handling of the HTTP requests
     TestBed.configureTestingModule({

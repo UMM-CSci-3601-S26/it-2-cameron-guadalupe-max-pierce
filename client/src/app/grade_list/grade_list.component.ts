@@ -60,7 +60,7 @@ import { MatToolbar } from '@angular/material/toolbar';
 export class GradeListComponent {
   private gradeListService = inject(GradeListService);
   // snackBar the `MatSnackBar` used to display feedback
-  private snackBar = inject(MatSnackBar);
+  public snackBar = inject(MatSnackBar);
 
   //dataSource = new MatTableDataSource<InventoryItem>([]);
   itemName = signal<string|undefined>(this.gradeListService.savedGradeListName);
@@ -274,14 +274,14 @@ export class GradeListComponent {
     );
   }
 
-  populateInventory(school_val: string, grade_val?: string) {
+  populateInventory(items: RequiredItem[], school_val: string, grade_val?: string ): number {
     let popArray: RequiredItem[] = [];
     let itemCount = 0;
     let duplicateCount = 0;
     if (grade_val) {
-      popArray = this.gradeListService.filterItems(this.serverFilteredItems(),{school:school_val,grade:grade_val});
+      popArray = this.gradeListService.filterItems(items,{school:school_val,grade:grade_val});
     } else {
-      popArray = this.gradeListService.filterItems(this.serverFilteredItems(),{school:school_val});
+      popArray = this.gradeListService.filterItems(items,{school:school_val});
     }
     let newItem: InventoryItem = {
       _id: undefined,
@@ -304,30 +304,7 @@ export class GradeListComponent {
       if (this.gradeListService.alreadyInInventory(popArray[i],this.gradeListService.inventoryReference())) {
         duplicateCount ++;
       } else {
-        this.gradeListService.addItemToInventory(newItem).subscribe({
-          next: () => {},
-          error: err => { //None of these should occur, since these items were already legally added. ...But just in case...
-            if (err.status === 400) {
-              this.snackBar.open(
-                `Tried to add an illegal new item – Error Code: ${err.status}\nMessage: ${err.message}`,
-                'OK',
-                { duration: 5000 }
-              );
-            } else if (err.status === 500) {
-              this.snackBar.open(
-                `The server failed to process your request to add a new item. Is the server up? – Error Code: ${err.status}\nMessage: ${err.message}`,
-                'OK',
-                { duration: 5000 }
-              );
-            } else {
-              this.snackBar.open(
-                `An unexpected error occurred – Error Code: ${err.status}\nMessage: ${err.message}`,
-                'OK',
-                { duration: 5000 }
-              );
-            }
-          },
-        });
+        this.gradeListService.addItemToInventory(newItem).subscribe({next: () => {}}); //Removed redundant error check
         //Increment counter for final message.
         itemCount ++;
       }
@@ -347,10 +324,7 @@ export class GradeListComponent {
         { duration: 4000 }
       );
       //Frustrating that this seems necessary. Surely there's a better way to do this?
-      setTimeout(() => {
-        window.location.reload();
-        //Why on Earth does it need such a long delay to handle this???
-      }, 4000);
+      this.gradeListService.reloadPage();
     } else {
       this.populateAllowed = false; //Prevents spam
       this.snackBar.open(
@@ -359,9 +333,8 @@ export class GradeListComponent {
         { duration: 4000 }
       );
       //See above
-      setTimeout(() => {
-        window.location.reload();
-      }, 4000);
+      this.gradeListService.reloadPage();
     }
+    return duplicateCount;
   }
 }
