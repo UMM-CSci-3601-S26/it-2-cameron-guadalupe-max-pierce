@@ -3,9 +3,9 @@
     "_id": {
       "$oid": "588935f57546a2daea44de7c"
     },
-    "name": "Yellow Pencils 12-Pack",
+    "name": "Black Pencils 12-Pack",
     "type": "pencils",
-    "desc":"12 Yellow #2 Ticonderoga pencils, sharpened, comes in packs of 12",
+    "desc":"12 Black #2 Ticonderoga pencils, sharpened, comes in packs of 12",
     "required":1,
     "school":"MAES",
     "grade":"K"
@@ -14,9 +14,9 @@
     "_id": {
       "$oid": "588935f5597715f06f3e8f6c"
     },
-    "name": "Red Folders",
+    "name": "Purple Folders",
     "type": "folders",
-    "desc":"Red plastic folders, GreatValue",
+    "desc":"Purple plastic folders, GreatValue",
     "required":1,
     "school":"MAES",
     "grade":"K"
@@ -25,9 +25,9 @@
     "_id": {
       "$oid": "588935f51c55b55c75a84848"
     },
-    "name": "Erasers 6-Pack",
+    "name": "Erasers 12-Pack",
     "type": "erasers",
-    "desc":"2-inch pink erasers, comes in packs of 6",
+    "desc":"1-inch pink erasers, comes in packs of 12",
     "required":1,
     "school":"MAES",
     "grade":"K"
@@ -75,5 +75,29 @@
     "required":4,
     "school":"MAES",
     "grade":"1"
+  },
+  {
+    "name": "Colored Markers 10-Pack",
+    "type": "markers",
+    "desc":"Crayola markers, 10-color pack",
+    "required":1,
+    "school":"Saint Mary's",
+    "grade":"2"
+  },
+  {
+    "name": "Colored Markers 10-Pack",
+    "type": "markers",
+    "desc":"Crayola markers, 10-color pack",
+    "required":1,
+    "school":"MAES",
+    "grade":"2"
+  },
+  {
+    "name": "Yellow Pencils 12-Pack",
+    "type": "pencils",
+    "desc":"Yellow #2 pencils, NOT TICONDEROGA",
+    "required":1,
+    "school":"MAES",
+    "grade":"4"
   }
 ]

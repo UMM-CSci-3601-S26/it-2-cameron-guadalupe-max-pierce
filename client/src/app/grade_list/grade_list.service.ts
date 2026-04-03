@@ -1,12 +1,17 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal} from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 import { RequiredItem } from './required_item';
+import { InventoryItem } from '../inventory/inventory_item';
 import { School } from './school';
 import { InventoryService } from '../inventory/inventory.service';
 import { FamilyService } from '../families/family.service';
+import { toSignal, toObservable} from '@angular/core/rxjs-interop';
+//import { catchError, combineLatest, of, switchMap, tap } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { combineLatest, switchMap, tap } from 'rxjs';
 //import { Company } from '../company-list/company';
 //import { Signal } from '@angular/core/rxjs-interop';
 
@@ -27,8 +32,11 @@ export class GradeListService {
   // might not be currently running.
   private httpClient = inject(HttpClient);
 
+  private snackBar = inject(MatSnackBar);
+  errMsg = signal<string | undefined>(undefined);
   // The URL for the users part of the server API.
-  readonly inventoryUrl: string = `${environment.apiUrl}grade_list`;
+  readonly inventoryUrl: string = `${environment.apiUrl}inventory`;
+  readonly gradeListUrl: string = `${environment.apiUrl}grade_list`;
   readonly schoolUrl: string = `${environment.apiUrl}schools`;
   //readonly usersByCompanyUrl: string = `${environment.apiUrl}usersByCompany`;
 
@@ -38,6 +46,8 @@ export class GradeListService {
   private readonly requiredKey = 'required';
   private readonly gradeKey = 'grade';
   private readonly schoolKey = 'school';
+  private readonly locationKey = 'location';
+  private readonly stockedKey = 'stocked';
 
   savedGradeListName = ''; //Per-session saved value for name search bar.
   savedGradeListRequired = 0; //Per-session saved value for stocked search bar.
@@ -112,9 +122,83 @@ export class GradeListService {
     }
     // Send the HTTP GET request with the given URL and parameters.
     // That will return the desired `Observable<InventoryItem[]>`.
-    return this.httpClient.get<RequiredItem[]>(this.inventoryUrl, {
+    return this.httpClient.get<RequiredItem[]>(this.gradeListUrl, {
       params: httpParams,
     });
+  }
+
+  getItemsFromInventory(filters?: { name?: string; stocked?: number; desc?: string; location?: string; type?: string; }): Observable<InventoryItem[]> {
+    // Necessary to check if populating items are already present.
+    let httpParams: HttpParams = new HttpParams();
+    if (filters) {
+      if (filters.name) {
+        httpParams = httpParams.set(this.nameKey, filters.name);
+      }
+      if (filters.stocked) {
+        httpParams = httpParams.set(this.stockedKey, filters.stocked.toString());
+      }
+      if (filters.location) {
+        httpParams = httpParams.set(this.locationKey, filters.location);
+      }
+      if (filters.desc) {
+        httpParams = httpParams.set(this.descKey, filters.desc);
+      }
+      if (filters.type) {
+        httpParams = httpParams.set(this.typeKey, filters.type);
+      }
+    }
+    // Send the HTTP GET request with the given URL and parameters.
+    // That will return the desired `Observable<InventoryItem[]>`.
+    return this.httpClient.get<InventoryItem[]>(this.inventoryUrl, {
+      params: httpParams,
+    });
+  }
+
+  //This is 100% not the correct way to do this.
+  itemName = signal<string|undefined>('');
+  itemStocked = signal<number|undefined>(0);
+  itemDesc = signal<string|undefined>('');
+  itemLocation = signal<string|undefined>('');
+  itemType = signal<string|undefined>('');
+
+  private itemName$ = toObservable(this.itemName);
+  private itemStock$ = toObservable(this.itemStocked);
+  private itemDesc$ = toObservable(this.itemDesc);
+  private itemLocation$ = toObservable(this.itemLocation);
+  private itemType$ = toObservable(this.itemType);
+
+  inventoryReference =
+    toSignal(
+      //Not actually doing any filtering on the server, just need to get Items.
+      combineLatest([this.itemName$,this.itemStock$,this.itemDesc$,this.itemLocation$,this.itemDesc$,this.itemType$]).pipe(
+        switchMap(() =>
+          this.getItemsFromInventory({}) //If we decide to filter on server, args go her
+        ),
+        tap(() => {
+        })
+      )
+    );
+
+  reloadPage() { //Not really a good way to test this.
+    setTimeout(() => {
+      window.location.reload();
+      //Why on Earth does it need such a long delay to handle this???
+    }, 3500);
+  }
+
+  alreadyInInventory( newItem: RequiredItem, inventory: InventoryItem[]): boolean {
+    const filteredItems = inventory;//this.inventoryReference();
+    let retVal = false;
+    let returnMessage = '';
+    //Works, but only if the page is reloaded after each press...
+    for (let i = 0; i < filteredItems.length; i ++) {
+      returnMessage = returnMessage.concat(" ~ ", filteredItems[i].name.toLowerCase());
+      if ((filteredItems[i].name.toLowerCase().indexOf(newItem.name.toLowerCase()) !== -1)
+      && (filteredItems[i].desc.toLowerCase().indexOf(newItem.desc.toLowerCase()) !== -1)) {
+        retVal = true;
+      }
+    }
+    return retVal;
   }
 
   //Helper function
@@ -130,7 +214,7 @@ export class GradeListService {
    */
   getItemById(id: string): Observable<RequiredItem> {
     // The input to get could also be written as (this.userUrl + '/' + id)
-    return this.httpClient.get<RequiredItem>(`${this.inventoryUrl}/${id}`);
+    return this.httpClient.get<RequiredItem>(`${this.gradeListUrl}/${id}`);
   }
 
   /**
@@ -211,11 +295,16 @@ export class GradeListService {
   addItem(newItem: Partial<RequiredItem>): Observable<string> {
     // Send post request to add a new item with the item data as the body.
     // `res.id` should be the MongoDB ID of the newly added `Item`.
+    return this.httpClient.post<{id: string}>(this.gradeListUrl, newItem).pipe(map(response => response.id));
+  }
+  addItemToInventory(newItem: Partial<InventoryItem>): Observable<string> {
+    // Send post request to add a new item to the INVENTORY.
+    // `res.id` should be the MongoDB ID of the newly added `Item`.
     return this.httpClient.post<{id: string}>(this.inventoryUrl, newItem).pipe(map(response => response.id));
   }
 
   deleteItem(id: string): Observable<RequiredItem> {
-    return this.httpClient.delete<RequiredItem>(`${this.inventoryUrl}/${id}`);
+    return this.httpClient.delete<RequiredItem>(`${this.gradeListUrl}/${id}`);
   }
 
   modifyMass(newProps:RequiredItem,oldItems:RequiredItem[]) {

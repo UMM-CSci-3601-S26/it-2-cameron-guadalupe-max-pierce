@@ -170,6 +170,6 @@ export class MockFamilyService implements Pick<FamilyService, 'getFamilies' | 'f
     location?: string;
     type?: string;
   }): Family[] {
-    return []
+    return MockFamilyService.testItems;
   }
 }

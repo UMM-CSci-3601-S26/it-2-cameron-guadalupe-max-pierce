@@ -1,9 +1,13 @@
 import { HttpClient, HttpParams, provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing'; //HttpTestingController
 import { TestBed, waitForAsync } from '@angular/core/testing';
 import { of } from 'rxjs';
+// import { Observable } from 'rxjs';
 import { RequiredItem } from './required_item';
+import { School } from './school';
+import { InventoryItem } from '../inventory/inventory_item';
 import { GradeListService } from './grade_list.service';
+// import { provideRouter } from '@angular/router';
 //import { Company } from '../company-list/company';
 
 describe('GradeListService', () => {
@@ -38,13 +42,52 @@ describe('GradeListService', () => {
     }
   ];
 
+  const testInventory: InventoryItem[] = [
+    {
+      _id: 'pencil_id',
+      name: 'Yellow Pencils',
+      type: 'pencil',
+      location: 'Tote #3',
+      stocked: 6,
+      desc: 'yellow Ticonderoga pencils'
+    },
+    {
+      _id: 'eraser_id',
+      name: '2-inch Eraser',
+      type: 'eraser',
+      location: 'Tote #4',
+      stocked: 2,
+      desc: '2-inch rubber eraser'
+    },
+    {
+      _id: 'folder_id',
+      name: 'Red Plastic Folder',
+      type: 'folder',
+      location: 'Tote #2',
+      stocked: 0,
+      desc: 'standard size red plastic folder.'
+    }
+  ];
+
+  const testSchools: School[] = [
+    {
+      _id:'',
+      label:'MAES',
+      value:'Morris Area Elementary School'
+    },
+    {
+      _id:'',
+      label:'Hancock',
+      value:'Hancock Elementary School'
+    }
+  ];
+
   let gradeService: GradeListService;
   // These are used to mock the HTTP requests so that we (a) don't have to
   // have the server running and (b) we can check exactly which HTTP
   // requests were made to ensure that we're making the correct requests.
   let httpClient: HttpClient;
-  let httpTestingController: HttpTestingController;
-
+  //let httpTestingController: HttpTestingController;
   beforeEach(() => {
     // Set up the mock handling of the HTTP requests
     TestBed.configureTestingModule({
@@ -54,13 +97,13 @@ describe('GradeListService', () => {
     // Construct an instance of the service with the mock
     // HTTP client.
     httpClient = TestBed.inject(HttpClient);
-    httpTestingController = TestBed.inject(HttpTestingController);
+    //httpTestingController = TestBed.inject(HttpTestingController);
     gradeService = TestBed.inject(GradeListService);
   });
 
   afterEach(() => {
     // After every test, assert that there are no more pending requests.
-    httpTestingController.verify();
+    //httpTestingController.verify();
   });
 
   describe('Updates saved search terms correctly', () => {
@@ -109,7 +152,7 @@ describe('GradeListService', () => {
           .toHaveBeenCalledTimes(1);
         expect(mockedMethod)
           .withContext('talks to the correct endpoint')
-          .toHaveBeenCalledWith(gradeService.inventoryUrl, { params: new HttpParams() });
+          .toHaveBeenCalledWith(gradeService.gradeListUrl, { params: new HttpParams() });
       });
     }));
   });
@@ -124,7 +167,7 @@ describe('GradeListService', () => {
           .toHaveBeenCalledTimes(1);
         expect(mockedMethod)
           .withContext('talks to the correct endpoint')
-          .toHaveBeenCalledWith(gradeService.inventoryUrl, { params: new HttpParams().set('name', 'pencil') });
+          .toHaveBeenCalledWith(gradeService.gradeListUrl, { params: new HttpParams().set('name', 'pencil') });
       });
     });
 
@@ -137,14 +180,97 @@ describe('GradeListService', () => {
           .toHaveBeenCalledTimes(1);
         expect(mockedMethod)
           .withContext('talks to the correct endpoint')
-          .toHaveBeenCalledWith(gradeService.inventoryUrl, { params: new HttpParams().set('required', '25') });
+          .toHaveBeenCalledWith(gradeService.gradeListUrl, { params: new HttpParams().set('required', '25') });
       });
     });
 
     it('correctly calls api/grade_list with multiple filter parameters', () => {
       const mockedMethod = spyOn(httpClient, 'get').and.returnValue(of(testItems));
 
-      gradeService.getItems({ name: 'pencil', type: 'pencil', required: 37, desc:'yellow', grade:'2' }).subscribe(() => {
+      gradeService.getItems({ name: 'pencil', type: 'pencil', required: 37, desc:'yellow', grade:'2', school:'MAES' }).subscribe(() => {
+        const [url, options] = mockedMethod.calls.argsFor(0);
+        const calledHttpParams: HttpParams = (options.params) as HttpParams;
+        expect(mockedMethod)
+          .withContext('one call')
+          .toHaveBeenCalledTimes(1);
+        expect(url)
+          .withContext('talks to the correct endpoint')
+          .toEqual(gradeService.gradeListUrl);
+        expect(calledHttpParams.keys().length)
+          .withContext('should have 6 params')
+          .toEqual(6);
+        expect(calledHttpParams.get('name'))
+          .withContext('name of item')
+          .toEqual('pencil');
+        expect(calledHttpParams.get('type'))
+          .withContext('type of pencil')
+          .toEqual('pencil');
+        expect(calledHttpParams.get('school'))
+          .withContext('MAES')
+          .toEqual('MAES');
+        expect(calledHttpParams.get('required'))
+          .withContext('37 required')
+          .toEqual('37');
+        expect(calledHttpParams.get('desc'))
+          .withContext('desc contains yellow')
+          .toEqual('yellow');
+        expect(calledHttpParams.get('grade'))
+          .withContext('for grade 2')
+          .toEqual('2');
+      });
+    });
+  });
+
+  describe('When getItemsFromInventory() is called with no parameters', () => {
+    it('calls `api/inventory`', waitForAsync(() => {
+      // Mock the `httpClient.get()` method, so that instead of making an HTTP request,
+      // it just returns our test data.
+      const mockedMethod = spyOn(httpClient, 'get').and.returnValue(of(testInventory));
+
+      gradeService.getItemsFromInventory().subscribe(() => {
+        // The mocked method (`httpClient.get()`) should have been called
+        // exactly one time.
+        expect(mockedMethod)
+          .withContext('one call')
+          .toHaveBeenCalledTimes(1);
+        expect(mockedMethod)
+          .withContext('talks to the correct endpoint')
+          .toHaveBeenCalledWith(gradeService.inventoryUrl, { params: new HttpParams() });
+      });
+    }));
+  });
+
+  describe('When getItems() is called with parameters, it correctly forms the HTTP request (Javalin/Server filtering)', () => {
+    it('correctly calls api/inventory with filter parameter \'Pencil\'', () => {
+      const mockedMethod = spyOn(httpClient, 'get').and.returnValue(of(testInventory));
+
+      gradeService.getItemsFromInventory({ name: 'pencil' }).subscribe(() => {
+        expect(mockedMethod)
+          .withContext('one call')
+          .toHaveBeenCalledTimes(1);
+        expect(mockedMethod)
+          .withContext('talks to the correct endpoint')
+          .toHaveBeenCalledWith(gradeService.inventoryUrl, { params: new HttpParams().set('name', 'pencil') });
+      });
+    });
+
+    it('correctly calls api/inventory with filter parameter \'stocked\'', () => {
+      const mockedMethod = spyOn(httpClient, 'get').and.returnValue(of(testItems));
+
+      gradeService.getItemsFromInventory({ stocked: 25 }).subscribe(() => {
+        expect(mockedMethod)
+          .withContext('one call')
+          .toHaveBeenCalledTimes(1);
+        expect(mockedMethod)
+          .withContext('talks to the correct endpoint')
+          .toHaveBeenCalledWith(gradeService.inventoryUrl, { params: new HttpParams().set('stocked', '25') });
+      });
+    });
+
+    it('correctly calls api/inventory with multiple filter parameters', () => {
+      const mockedMethod = spyOn(httpClient, 'get').and.returnValue(of(testItems));
+
+      gradeService.getItemsFromInventory({ name: 'pencil', type: 'pencil', stocked: 37, desc:'yellow', location:'Tote #3' }).subscribe(() => {
         const [url, options] = mockedMethod.calls.argsFor(0);
         const calledHttpParams: HttpParams = (options.params) as HttpParams;
         expect(mockedMethod)
@@ -162,17 +288,36 @@ describe('GradeListService', () => {
         expect(calledHttpParams.get('type'))
           .withContext('type of pencil')
           .toEqual('pencil');
-        expect(calledHttpParams.get('required'))
-          .withContext('37 required')
+        expect(calledHttpParams.get('stocked'))
+          .withContext('37 stocked')
           .toEqual('37');
         expect(calledHttpParams.get('desc'))
           .withContext('desc contains yellow')
           .toEqual('yellow');
-        expect(calledHttpParams.get('grade'))
-          .withContext('for grade 2')
-          .toEqual('2');
+        expect(calledHttpParams.get('location'))
+          .withContext('in Tote #3')
+          .toEqual('Tote #3');
       });
     });
+  });
+
+  describe('When getSchools() is called with no parameters', () => {
+    it('calls `api/schools`', waitForAsync(() => {
+      // Mock the `httpClient.get()` method, so that instead of making an HTTP request,
+      // it just returns our test data.
+      const mockedMethod = spyOn(httpClient, 'get').and.returnValue(of(testSchools));
+
+      gradeService.getSchools().subscribe(() => {
+        // The mocked method (`httpClient.get()`) should have been called
+        // exactly one time.
+        expect(mockedMethod)
+          .withContext('one call')
+          .toHaveBeenCalledTimes(1);
+        expect(mockedMethod)
+          .withContext('talks to the correct endpoint')
+          .toHaveBeenCalledWith(gradeService.schoolUrl);
+      });
+    }));
   });
 
   describe('When getItemById() is given an ID', () => {
@@ -190,7 +335,7 @@ describe('GradeListService', () => {
           .toHaveBeenCalledTimes(1);
         expect(mockedMethod)
           .withContext('talks to the correct endpoint')
-          .toHaveBeenCalledWith(`${gradeService.inventoryUrl}/${targetId}`);
+          .toHaveBeenCalledWith(`${gradeService.gradeListUrl}/${targetId}`);
       });
     }));
   });
@@ -216,6 +361,15 @@ describe('GradeListService', () => {
       // Every returned item's name should contain an 'Ticonderoga'.
       filteredItems.forEach(item => {
         expect(item.desc.indexOf(itemDesc)).toBeGreaterThanOrEqual(0);
+      });
+    });
+
+    it('filters by school', () => {
+      const itemSchool = 'MAES';
+      const filteredItems = gradeService.filterItems(testItems, { school: itemSchool });
+      expect(filteredItems.length).toBe(2);
+      filteredItems.forEach(item => {
+        expect(item.school.indexOf(itemSchool)).toBeGreaterThanOrEqual(0);
       });
     });
 
@@ -303,7 +457,7 @@ describe('GradeListService', () => {
           .toHaveBeenCalledTimes(1);
         expect(mockedMethod)
           .withContext('talks to the correct endpoint')
-          .toHaveBeenCalledWith(`${gradeService.inventoryUrl}/${targetId}`);
+          .toHaveBeenCalledWith(`${gradeService.gradeListUrl}/${targetId}`);
       });
     }));
   });
@@ -321,8 +475,44 @@ describe('GradeListService', () => {
           .toHaveBeenCalledTimes(1);
         expect(mockedMethod)
           .withContext('talks to the correct endpoint')
+          .toHaveBeenCalledWith(`${gradeService.gradeListUrl}`, targetItem );
+      });
+    }));
+  });
+
+  describe('When addItemToInventory() is called', () => {
+    it('talks to correct Endpoint', waitForAsync(() => {
+      // Checking whether the item was actually deleted should happen in E2E probably
+      const targetItem: RequiredItem = testItems[1];
+
+      const mockedMethod = spyOn(httpClient, 'post').and.returnValue(of(targetItem));
+
+      gradeService.addItemToInventory(targetItem).subscribe(() => {
+        expect(mockedMethod)
+          .withContext('one call')
+          .toHaveBeenCalledTimes(1);
+        expect(mockedMethod)
+          .withContext('talks to the correct endpoint')
           .toHaveBeenCalledWith(`${gradeService.inventoryUrl}`, targetItem );
       });
+    }));
+    it('does not allow duplicate items', waitForAsync(() => {
+      const targetItem: RequiredItem = testItems[1];
+      //const mockedMethod = spyOn(httpClient, 'post').and.returnValue(of(targetItem));
+      expect(gradeService.alreadyInInventory(targetItem,testInventory)).toBeTrue();
+    }));
+    it('allows new items to be added', waitForAsync(() => {
+      const targetItem: RequiredItem = {
+        _id:undefined,
+        name:'Test',
+        desc:'This is a test',
+        grade:'2',
+        school:'MAES',
+        required:2,
+        type:'other'
+      }
+      //const mockedMethod = spyOn(httpClient, 'post').and.returnValue(of(targetItem));
+      expect(gradeService.alreadyInInventory(targetItem,testInventory)).toBeFalse();
     }));
   });
 
@@ -377,7 +567,7 @@ describe('GradeListService', () => {
       expect(mockedAdd)
         .withContext('calls add')
         //Way to add multiple call checks? Every item should be called.
-        .toHaveBeenCalledWith(`${gradeService.inventoryUrl}`, copiedItemsIDless[0]);
+        .toHaveBeenCalledWith(`${gradeService.gradeListUrl}`, copiedItemsIDless[0]);
 
       expect(mockedDelete)
         .withContext('calls delete')
@@ -412,7 +602,7 @@ describe('GradeListService', () => {
       expect(mockedAdd)
         .withContext('calls add')
         //Way to add multiple call checks? Every item should be called.
-        .toHaveBeenCalledWith(`${gradeService.inventoryUrl}`, overrideItemIDless);
+        .toHaveBeenCalledWith(`${gradeService.gradeListUrl}`, overrideItemIDless);
 
       expect(mockedDelete)
         .withContext('calls delete')
