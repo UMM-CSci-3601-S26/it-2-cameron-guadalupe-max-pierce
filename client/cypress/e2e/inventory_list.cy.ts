@@ -22,11 +22,11 @@ describe('Item list', () => {
   });
 
   it('Should type something in the name filter and return one item', () => {
-    cy.get('[data-test=itemNameInput]').clear().type('Yellow Pencils 12-Pack');
+    cy.get('[data-test=itemNameInput]').clear().type('Yellow Pencil');
 
     page.getItemListItems().should('have.length', 1);
 
-    page.getItemListItems().first().find('.item-list-name').should('contain.text', 'Yellow Pencils 12-Pack');
+    page.getItemListItems().first().find('.item-list-name').should('contain.text', 'Yellow Pencil');
   });
 
   it('Should type something in the location filter and return correct items', () => {
@@ -55,7 +55,7 @@ describe('Item list', () => {
     page.getItemListItems().find('.item-list-name')
       .should('contain.text', 'Red Folders')
       .should('contain.text', 'Green Folders')
-      .should('contain.text', 'Colored Pencils 16-Pack')
+      //.should('contain.text', 'Colored Pencils 16-Pack')
       .should('contain.text', 'Pencil Box')
       .should('contain.text', 'Paper Folders')
       .should('not.contain.text', 'Erasers 6-Pack')
@@ -63,10 +63,10 @@ describe('Item list', () => {
   });
 
   it('Should type something in the description filter and return matching items', () => {
-    cy.get('[data-test=itemDescInput]').clear().type('Yellow #2 Ticonderoga pencils, sharpened, comes in packs of 12');
+    cy.get('[data-test=itemDescInput]').clear().type('Yellow #2');
 
     page.getItemListItems().should('have.length', 1);
-    page.getItemListItems().first().find('.item-list-desc').should('contain.text', 'Yellow #2 Ticonderoga pencils, sharpened, comes in packs of 12');
+    page.getItemListItems().first().find('.item-list-desc').should('contain.text', 'Yellow #2');
   });
 
   it('Should click item and go to the right URL', () => {

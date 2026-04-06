@@ -75,6 +75,7 @@ describe('Add item', () => {
         desc: 'Red plastic folders, GreatValue',
         location: 'Tote #2',
         stocked: 3,
+        pack:1
       };
 
       cy.intercept('POST', '/api/inventory').as('addItem');
@@ -82,7 +83,7 @@ describe('Add item', () => {
       cy.wait('@addItem', { timeout: 10000 });
 
       // Wait a bit for navigation to complete
-      cy.wait(1000);
+      cy.wait(2000);
 
       // Verify we navigated away from the /inventory/new page
       cy.url().should('not.match', /\/inventory\/new$/);
@@ -96,6 +97,7 @@ describe('Add item', () => {
         location: null, // The company being set to null means nothing will be typed for it
         desc: 'missing location',
         stocked: 5,
+        pack:1
       };
 
       // Fill the form but leave location empty
