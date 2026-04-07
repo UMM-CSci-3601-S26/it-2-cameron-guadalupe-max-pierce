@@ -6,6 +6,7 @@ import { FamilyListComponent } from './families/family_list.component';
 import { GradeListComponent } from './grade_list/grade_list.component';
 import { AddRequirementComponent } from './grade_list/add_grade_list_item.component';
 import { ModifyRequirementComponent } from './grade_list/modify_grade_list_item.component';
+import { AddFamilySurveyComponent } from './families/add_family_survey.component';
 
 //import { CompanyListComponent } from './company-list/company-list.component';
 import { InventoryListComponent } from './inventory/inventory_list.component';
@@ -18,6 +19,7 @@ import { ModifyItemComponent } from './inventory/modify_inventory_item.component
 const routes: Routes = [
   {path: '', component: HomeComponent, title: 'Home'},
   {path: 'families', component: FamilyListComponent, title: 'Families'},
+  {path: 'families/survey', component: AddFamilySurveyComponent, title: 'Backpack Survey'},
   {path: 'grade_list', component: GradeListComponent, title: 'Requirements'},
   {path: 'grade_list/new', component: AddRequirementComponent, title: 'Add Requirement'},
   {path: 'grade_list/:id', component: ModifyRequirementComponent, title: 'Requirement Profile'},

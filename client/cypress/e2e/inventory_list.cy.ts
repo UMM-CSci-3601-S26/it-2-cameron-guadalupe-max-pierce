@@ -85,4 +85,19 @@ describe('Item list', () => {
     cy.get('.add-item-title').should('have.text', 'New Item');
   });
 
+  it('Should relocate a selected item and refresh the list without manual reload', () => {
+    page.clickFirstEnabledItemCheckbox().should('be.checked');
+
+    page.relocateSelectedButton().should('be.visible');
+
+    cy.window().then((win) => {
+      cy.stub(win, 'prompt').returns('Shelf A');
+    });
+
+    page.relocateSelectedButton().click();
+
+    page.getItemListItems().first().find('.item-list-desc').should('contain.text', 'Shelf A');
+    page.relocateSelectedButton().should('not.exist');
+  });
+
 });
