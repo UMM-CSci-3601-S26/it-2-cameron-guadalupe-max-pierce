@@ -52,6 +52,21 @@
             </mat-autocomplete>
             <mat-hint>Search by type</mat-hint>
           </mat-form-field>
+
+          @if(selectedItems().size > 0) {
+            <button
+              mat-raised-button
+              type="button"
+              color="warn"
+              type="back"
+              [style.height.px]=55
+              (click)="modifySelected()"
+              data-test="modifySelectedButton"
+              >
+              Modify Selected
+            </button>
+          }
+
           <button
             mat-raised-button
             type="button"
