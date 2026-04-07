@@ -347,99 +347,51 @@ describe('InventoryService', () => {
   });
 
   describe('When modifyMass() is called', () => {
-    let copiedItems = [];
-    let copiedItemsIDless = [];
-    let emptyItem: InventoryItem = {
-      _id: undefined,
-      name: undefined,
-      type: undefined,
-      location: undefined,
-      stocked: undefined,
-      desc: undefined,
-      pack: undefined
-    }
+    it('completes immediately when there are no items', waitForAsync(() => {
+      let completed = false;
 
-    beforeEach(() => {
-      //Create a new array to compare to the actual testItems after each modification
-      copiedItems = [];
-      copiedItemsIDless = [];
-      for (let i = 0; i < testItems.length - 1; i++) {
-        copiedItems.push(testItems[i]);
-        testItems[i]._id = undefined;
-        copiedItemsIDless.push(testItems[i]); //Used to test mass modification
-      }
-      //Reset empty item properties.
-      emptyItem = {
-        _id: undefined,
-        name: undefined,
-        type: undefined,
-        location: undefined,
-        stocked: undefined,
-        desc: undefined,
-        pack: undefined
-      }
-    });
+      inventoryService.modifyMass({} as InventoryItem, []).subscribe({
+        complete: () => {
+          completed = true;
+        }
+      });
 
-    //Accepts a normal array, so thankfully easy to test?
-    it('talks to correct Endpoints', waitForAsync(() => {
-      // Checking whether the item was actually deleted should happen in E2E probably
-      const targetItem: InventoryItem = testItems[1]; //This will be a duplicate
-
-      const mockedAdd = spyOn(httpClient, 'post').and.returnValue(of(targetItem));
-      const mockedDelete = spyOn(httpClient, 'delete').and.returnValue(of(targetItem));
-
-
-      inventoryService.modifyMass(emptyItem,copiedItems);
-
-      //This is still called even with no parameters.
-      //Not ideal, but we shouldn't ever be calling it without parameters anyways.
-
-      expect(mockedAdd)
-        .withContext('calls add')
-        //Way to add multiple call checks? Every item should be called.
-        .toHaveBeenCalledWith(`${inventoryService.inventoryUrl}`, copiedItemsIDless[0]);
-
-      expect(mockedDelete)
-        .withContext('calls delete')
-        .toHaveBeenCalledTimes(1);
-
-      //Obviously we could do more testing here...
-      // but it at least gets us to coverage, and it works for now.
+      expect(completed).toBeTrue();
     }));
-    it('works correctly when provided parameters', waitForAsync(() => {
-      // Checking whether the item was actually deleted should happen in E2E probably
-      const targetItem: InventoryItem = testItems[1]; //This will be a duplicate
-      const overrideItem: InventoryItem = testItems[2]; //Item to override properties.
-      const overrideItemIDless: InventoryItem = {
-        _id: undefined,
-        name: testItems[2].name,
-        type: testItems[2].type,
-        location: testItems[2].location,
-        stocked: testItems[2].stocked,
-        desc: testItems[2].desc,
-        pack: testItems[2].pack
-      }
 
-      const mockedAdd = spyOn(httpClient, 'post').and.returnValue(of(targetItem));
-      const mockedDelete = spyOn(httpClient, 'delete').and.returnValue(of(targetItem));
+    it('adds then deletes every item in the input array', waitForAsync(() => {
+      const addSpy = spyOn(inventoryService, 'addItem').and.returnValue(of('new_id'));
+      const deleteSpy = spyOn(inventoryService, 'deleteItem').and.returnValue(of(testItems[0]));
+      let completed = false;
 
+      inventoryService.modifyMass({ location: 'Shelf A' } as InventoryItem, testItems).subscribe({
+        complete: () => {
+          completed = true;
+        }
+      });
 
-      inventoryService.modifyMass(overrideItem,copiedItems);
+      expect(addSpy).toHaveBeenCalledTimes(testItems.length);
+      expect(deleteSpy).toHaveBeenCalledTimes(testItems.length);
+      expect(addSpy.calls.argsFor(0)[0]).toEqual(jasmine.objectContaining({ location: 'Shelf A' }));
+      expect(deleteSpy).toHaveBeenCalledWith(testItems[0]._id);
+      expect(deleteSpy).toHaveBeenCalledWith(testItems[1]._id);
+      expect(deleteSpy).toHaveBeenCalledWith(testItems[2]._id);
+      expect(completed).toBeTrue();
+    }));
 
-      //This is still called even with no parameters.
-      //Not ideal, but we shouldn't ever be calling it without parameters anyways.
+    it('preserves original values when a field is undefined in overrides', waitForAsync(() => {
+      const addSpy = spyOn(inventoryService, 'addItem').and.returnValue(of('new_id'));
+      spyOn(inventoryService, 'deleteItem').and.returnValue(of(testItems[0]));
 
-      expect(mockedAdd)
-        .withContext('calls add')
-        //Way to add multiple call checks? Every item should be called.
-        .toHaveBeenCalledWith(`${inventoryService.inventoryUrl}`, overrideItemIDless);
+      inventoryService.modifyMass({ location: 'Shelf Z' } as InventoryItem, [testItems[0]]).subscribe();
 
-      expect(mockedDelete)
-        .withContext('calls delete')
-        .toHaveBeenCalledTimes(1);
-
-      //Obviously we could do more testing here...
-      // but it at least gets us to coverage, and it works for now.
+      const payload = addSpy.calls.mostRecent().args[0] as Partial<InventoryItem>;
+      expect(payload.name).toBe(testItems[0].name);
+      expect(payload.location).toBe('Shelf Z');
+      expect(payload.type).toBe(testItems[0].type);
+      expect(payload.desc).toBe(testItems[0].desc);
+      expect(payload.stocked).toBe(testItems[0].stocked);
+      expect(payload.pack).toBe(testItems[0].pack);
     }));
   });
 });
