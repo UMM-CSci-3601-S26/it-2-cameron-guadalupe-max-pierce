@@ -81,17 +81,30 @@ export class AddFamilySurveyComponent {
     ];
   }
 
+  private isValidEmail(email: string): boolean {
+    const normalized = email?.trim();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return Boolean(normalized && emailPattern.test(normalized));
+  }
+
   submitSurvey(): void {
     if (
       !this.surveyFamilyLastName ||
       !this.surveyParentEmail ||
+      !this.isValidEmail(this.surveyParentEmail) ||
       this.surveyChildren.some(
         c => !c.firstName || !c.lastName || !c.school || !c.grade
       )
     ) {
-      this.snackBar.open('Please fill in all required fields', 'OK', {
-        duration: 5000
-      });
+      this.snackBar.open(
+        !this.surveyParentEmail || !this.isValidEmail(this.surveyParentEmail)
+          ? 'Please enter a valid parent email address'
+          : 'Please fill in all required fields',
+        'OK',
+        {
+          duration: 5000
+        }
+      );
       return;
     }
 

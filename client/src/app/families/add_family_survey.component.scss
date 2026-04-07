@@ -33,8 +33,18 @@
   margin-bottom: 12px;
 }
 
+.child-card {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.child-card mat-card-content {
+  padding-top: 0;
+}
+
 .child-actions {
-  margin-top: 8px;
+  justify-content: flex-end;
+  padding: 0 16px 16px;
   display: flex;
   gap: 8px;
 }
