@@ -359,7 +359,7 @@ describe('InventoryService', () => {
       expect(completed).toBeTrue();
     }));
 
-    it('adds then deletes every item in the input array', waitForAsync(() => {
+    it('adds then deletes every item in the list provided', waitForAsync(() => {
       const addSpy = spyOn(inventoryService, 'addItem').and.returnValue(of('new_id'));
       const deleteSpy = spyOn(inventoryService, 'deleteItem').and.returnValue(of(testItems[0]));
       let completed = false;
@@ -379,7 +379,7 @@ describe('InventoryService', () => {
       expect(completed).toBeTrue();
     }));
 
-    it('preserves original values when a field is undefined in overrides', waitForAsync(() => {
+    it('keeps values the same when a field is undefined', waitForAsync(() => {
       const addSpy = spyOn(inventoryService, 'addItem').and.returnValue(of('new_id'));
       spyOn(inventoryService, 'deleteItem').and.returnValue(of(testItems[0]));
 

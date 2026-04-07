@@ -102,7 +102,7 @@ describe('Inventory list', () => {
     );
   });
 
-  it('refetches items after location reset completes', () => {
+  it('gets items after location reset completes', () => {
     const getItemsSpy = spyOn(inventoryService, 'getItems').and.callThrough();
     spyOn(inventoryService, 'modifyMass').and.returnValue(of(void 0));
 
