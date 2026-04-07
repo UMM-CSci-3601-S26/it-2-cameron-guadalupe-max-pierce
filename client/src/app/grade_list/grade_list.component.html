@@ -120,18 +120,47 @@
               @for (school of schoolFilteredItems(); track school.grades) {
                 <mat-card class="section-card">
                 <mat-card-content>
-                <h2 matSubheader>{{ school.school_header }}</h2>
+                <mat-toolbar color="primary">
+                <h2 matSubheader><strong>{{ school.school_header }}</strong></h2>
+                <span class="flexExpand"></span>
+                <button mat-raised-button
+                  type="button"
+                  color="accent"
+                  [style.height.px]=30
+                  [disabled]="!populateAllowed"
+                  data-test="populateButtonSchool"
+                  (click)="populateInventory(serverFilteredItems(),school.school_val)"
+                >
+                Add all requirements to Inventory
+                </button>
+                </mat-toolbar>
                 <!--Sublist for each grade-->
                 @for (grade of school.grades; track grade.grade_header) {
                     <mat-card class="sub-section-card">
                     <mat-card-content>
-                    <h3 matSubheader>{{ grade.grade_header }}</h3>
-                    @for (item of grade.items; track item._id) {
-                      <a mat-list-item [routerLink]="['/grade_list', item._id]" class="item-list-item">
-                      <span matListItemTitle mat-line class="item-list-name"> x<strong>{{item.required}}</strong> ~ {{item.name}}</span>
-                      <span matListItemLine class="item-list-desc"> {{item.desc}} ~ required for {{item.school}}, {{item.grade}}</span>
+                      <mat-toolbar color="primary">
+                      <h3 matSubheader><strong>{{ grade.grade_header }}</strong></h3>
+                      <span class="flexExpand"></span>
+                      <button mat-raised-button
+                        type="button"
+                        color="accent"
+                        [style.height.px]=30
+                        data-test="populateButton"
+                        [disabled]="!populateAllowed"
+                        (click)="populateInventory(serverFilteredItems(),school.school_val, grade.grade_val)"
+                      >
+                      Add {{grade.grade_header}} requirements to Inventory
+                      </button>
+                      </mat-toolbar>
+                      @for (item of grade.items; track item._id) {
+                        <a mat-list-item [routerLink]="['/grade_list', item._id]" class="item-list-item">
+                        <span matListItemTitle mat-line class="item-list-name"> x<strong>{{item.required}}</strong> ~ {{item.name}}</span>
+                        <span matListItemLine class="item-list-desc"> {{item.desc}} ~ required for {{item.school}}, {{item.grade}}</span>
+                        @if (item.pack > 1) {
+                          <span matListItemLine class="item-list-desc">Package of {{item.pack}} ct.</span>
+                        }
                       </a>
-                    }
+                      }
                     </mat-card-content>
                     </mat-card>
                 }
@@ -145,12 +174,17 @@
               @for (collection of typeFilteredItems(); track collection.items) {
                 <mat-card class = "section-card">
                 <mat-card-content>
+                <mat-toolbar color="primary">
                 <h2 matSubheader>{{ collection.header }}</h2>
+                </mat-toolbar>
                 <!--Sublist for each item type-->
                 @for (item of collection.items; track item._id) {
                     <a mat-list-item [routerLink]="['/grade_list', item._id]" class="item-list-item">
                     <span matListItemTitle mat-line class="item-list-name"> x<strong>{{item.required}}</strong> ~ {{item.name}}</span>
                     <span matListItemLine class="item-list-desc"> {{item.desc}} ~ required for {{item.school}}, {{item.grade}}</span>
+                    @if (item.pack > 1) {
+                      <span matListItemLine class="item-list-desc">Package of {{item.pack}} ct.</span>
+                    }
                     </a>
                 }
                 </mat-card-content>
@@ -166,6 +200,9 @@
                   <a mat-list-item [routerLink]="['/grade_list', item._id]" class="item-list-item">
                   <span matListItemTitle mat-line class="item-list-name"> <strong>x{{item.required}}</strong> ~ {{item.name}}</span>
                   <span matListItemLine class="item-list-desc"> {{item.desc}} ~ required for {{item.school}}, {{item.grade}}</span>
+                  @if (item.pack > 1) {
+                    <span matListItemLine class="item-list-desc">Package of {{item.pack}} ct.</span>
+                  }
                   </a>
               }
             </mat-nav-list>

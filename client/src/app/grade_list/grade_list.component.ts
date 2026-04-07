@@ -14,12 +14,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
 import { catchError, combineLatest, of, switchMap, tap } from 'rxjs';
 import { RequiredItem } from './required_item';
+import { InventoryItem } from '../inventory/inventory_item';
 //import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 //import { InventoryCardComponent } from './inventory_card.component';
 import { GradeListService } from './grade_list.service';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { School } from './school';
+import { MatToolbar } from '@angular/material/toolbar';
 
 /**
  * A component that displays a list of users, either as a grid
@@ -45,6 +47,7 @@ import { School } from './school';
     MatAutocompleteModule,
     MatOptionModule,
     MatRadioModule,
+    MatToolbar,
     // MatTableModule,
     //InventoryCardComponent,
     MatListModule,
@@ -57,7 +60,7 @@ import { School } from './school';
 export class GradeListComponent {
   private gradeListService = inject(GradeListService);
   // snackBar the `MatSnackBar` used to display feedback
-  private snackBar = inject(MatSnackBar);
+  public snackBar = inject(MatSnackBar);
 
   //dataSource = new MatTableDataSource<InventoryItem>([]);
   itemName = signal<string|undefined>(this.gradeListService.savedGradeListName);
@@ -68,6 +71,7 @@ export class GradeListComponent {
   itemType = signal<string|undefined>(this.gradeListService.savedGradeListType);
   sortBy = signal<string|undefined>(this.gradeListService.savedGradeListSortBy);
   resetVisible = signal<boolean|undefined>(false);//Reset button is initially hidden.
+  populateAllowed = true; //Set to false when a populate button is pressed; reset when page reloads. Prevents spamming.
 
   filteredTypeOptions = computed(() => {
     const input = (this.itemType() || '').toLowerCase();
@@ -212,8 +216,10 @@ export class GradeListComponent {
     //Doubly nested- contains an array of school headers and grades; grades contains an array of grade_headers and items arrays.
     const schooledArray: {
       school_header: string,
+      school_val: string,
       grades: {
         grade_header:string,
+        grade_val:string,
         items:RequiredItem[]
       }[];
     }[] = [];
@@ -240,7 +246,8 @@ export class GradeListComponent {
         })
         if (matchingItems.length > 0) {
           matchingGrades.push({
-            grade_header: this.gradeListService.gradeOptions[g].label,
+            grade_header: this.gradeListService.gradeOptions[g].label, //This is gonna keep bugging me...
+            grade_val: this.gradeListService.gradeOptions[g].value,
             items: matchingItems
           })
         }
@@ -249,6 +256,7 @@ export class GradeListComponent {
       if (matchingGrades.length > 0) {
         schooledArray.push({
           school_header: this.serverFilteredSchools()[s].value,
+          school_val: this.serverFilteredSchools()[s].label,
           grades: matchingGrades
         })
       }
@@ -266,21 +274,60 @@ export class GradeListComponent {
     );
   }
 
-  // resetLocations() {
-  //   // const tempItem: InventoryItem = {
-  //   //   _id:undefined,
-  //   //   location:"N/A",
-  //   //   stocked:undefined,
-  //   //   name:undefined,
-  //   //   type:undefined,
-  //   //   desc:undefined
-  //   // }
-  //   // this.inventoryService.modifyMass(tempItem,this.filteredItems());
-  //   //TODO, We need to update something, such that the page doesn't need manual reloading...
-  //   this.snackBar.open(
-  //     `Grades not actually reset. This is a work in progress.`,
-  //     'OK',
-  //     { duration: 6000 }
-  //   );
-  // }
+  populateInventory(items: RequiredItem[], school_val: string, grade_val?: string ): number {
+    let popArray: RequiredItem[] = [];
+    let itemCount = 0;
+    let duplicateCount = 0;
+    if (grade_val) {
+      popArray = this.gradeListService.filterItems(items,{school:school_val,grade:grade_val});
+    } else {
+      popArray = this.gradeListService.filterItems(items,{school:school_val});
+    }
+    for (let i = 0; i < popArray.length; i ++) {
+      const newItem: InventoryItem = {
+        _id: '',
+        name:popArray[i].name,
+        type:popArray[i].type,
+        location:'N/A',
+        stocked:0,
+        pack:popArray[i].pack,
+        desc:popArray[i].desc,
+      }
+      //Check and Add each item. For some reason alreadyInInventory breaks shit.
+      if (this.gradeListService.alreadyInInventory(popArray[i],this.gradeListService.inventoryReference())) {
+        duplicateCount ++;
+      } else {
+        this.gradeListService.addItemToInventory(newItem).subscribe({next: () => {}}); //Removed redundant error check
+        //Increment counter for final message.
+        itemCount ++;
+      }
+    }
+    //Will need to test for all 3 scenarios. =-(
+    if ((duplicateCount > 0) && (itemCount == 0)) {
+      this.snackBar.open(
+        `All x${duplicateCount.toString()} Items already present in Inventory.`,
+        'OK',
+        { duration: 5000 }
+      );
+    } else if ((duplicateCount > 0) && (itemCount > 0)) {
+      this.populateAllowed = false; //Prevents spam
+      this.snackBar.open(
+        `Adding x${itemCount.toString()} new Items from ${school_val}, ${grade_val} to Inventory. Please wait a moment...`,
+        'OK',
+        { duration: 4000 }
+      );
+      //Frustrating that this seems necessary. Surely there's a better way to do this?
+      this.gradeListService.reloadPage();
+    } else {
+      this.populateAllowed = false; //Prevents spam
+      this.snackBar.open(
+        `Adding all x${itemCount.toString()} Items from ${school_val}, ${grade_val} to Inventory. Please wait a moment...`,
+        'OK',
+        { duration: 4000 }
+      );
+      //See above
+      this.gradeListService.reloadPage();
+    }
+    return duplicateCount;
+  }
 }
