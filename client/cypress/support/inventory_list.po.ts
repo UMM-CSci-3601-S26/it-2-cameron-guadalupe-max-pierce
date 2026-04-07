@@ -3,8 +3,10 @@ export class ItemListPage {
   private readonly pageTitle = '.inventory-list-title';
   private readonly itemCardSelector = '.item-card';
   private readonly itemListItemsSelector = '.item-nav-list .item-list-item';
+  private readonly itemCheckboxSelector = 'mat-checkbox';
   private readonly profileButtonSelector = '[data-test=viewProfileButton]';
   private readonly addItemButtonSelector = '[data-test=addItemButton]';
+  private readonly relocateSelectedButtonSelector = '[data-test=relocateSelectedButton]';
 
   navigateTo() {
     return cy.visit(this.baseUrl);
@@ -41,6 +43,14 @@ export class ItemListPage {
     return cy.get(this.itemListItemsSelector);
   }
 
+  getItemCheckboxes() {
+    return cy.get(`${this.itemListItemsSelector} ${this.itemCheckboxSelector}`);
+  }
+
+  getEnabledItemCheckboxInputs() {
+    return cy.get(`${this.itemListItemsSelector} input[type="checkbox"]:enabled`);
+  }
+
   /**
    * Clicks the "view profile" button for the given user card.
    * Requires being in the "card" view.
@@ -55,7 +65,19 @@ export class ItemListPage {
     return this.getItemListItems().eq(index).click();
   }
 
+  clickItemCheckbox(index: number) {
+    return this.getItemCheckboxes().eq(index).click({ force: true });
+  }
+
+  clickFirstEnabledItemCheckbox() {
+    return this.getEnabledItemCheckboxInputs().first().check({ force: true });
+  }
+
   addItemButton() {
     return cy.get(this.addItemButtonSelector);
+  }
+
+  relocateSelectedButton() {
+    return cy.get(this.relocateSelectedButtonSelector);
   }
 }
