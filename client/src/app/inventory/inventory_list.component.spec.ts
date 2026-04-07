@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { MockInventoryService } from 'src/testing/inventory.service.mock';
 import { InventoryListComponent } from './inventory_list.component';
 import { InventoryItem } from './inventory_item';
@@ -101,6 +101,45 @@ describe('Inventory list', () => {
       originalItems
     );
   });
+
+  it('refetches items after location reset completes', () => {
+    const getItemsSpy = spyOn(inventoryService, 'getItems').and.callThrough();
+    spyOn(inventoryService, 'modifyMass').and.returnValue(of(void 0));
+
+    const callsBeforeReset = getItemsSpy.calls.count();
+    inventoryList.resetLocations();
+    fixture.detectChanges();
+
+    expect(getItemsSpy.calls.count()).toBeGreaterThan(callsBeforeReset);
+  });
+
+  it('does not relocate when prompt is cancelled', () => {
+    spyOn(window, 'prompt').and.returnValue(null);
+    const modifySpy = spyOn(inventoryService, 'modifyMass').and.returnValue(of(void 0));
+
+    inventoryList.relocateSelected();
+
+    expect(modifySpy).not.toHaveBeenCalled();
+  });
+
+  it('relocates selected items and clears selection on completion', () => {
+    spyOn(inventoryService, 'filterItems').and.callFake((items) => items);
+    inventoryList.itemName.set('pencil');
+    fixture.detectChanges();
+    const selectedId = inventoryList.filteredItems()[0]._id;
+    inventoryList.selectedItems.set(new Set([selectedId]));
+    spyOn(window, 'prompt').and.returnValue('Shelf A');
+    const modifySpy = spyOn(inventoryService, 'modifyMass').and.returnValue(of(void 0));
+
+    inventoryList.relocateSelected();
+    fixture.detectChanges();
+
+    expect(modifySpy).toHaveBeenCalled();
+    const modifiedItems = modifySpy.calls.mostRecent().args[1] as InventoryItem[];
+    expect(modifiedItems.length).toBe(1);
+    expect(modifiedItems[0]._id).toBe(selectedId);
+    expect(inventoryList.selectedItems().size).toBe(0);
+  });
 });
 
 describe('Misbehaving Item List', () => {
@@ -111,6 +150,8 @@ describe('Misbehaving Item List', () => {
     getItems: () => Observable<InventoryItem[]>;
     filterItems: () => InventoryItem[];
     updateSavedSearch: () => undefined;
+    typeOptions: { value: string; label: string }[];
+    modifyMass: () => Observable<void>;
   };
 
   beforeEach(() => {
@@ -121,7 +162,9 @@ describe('Misbehaving Item List', () => {
           observer.error('getItems() Observer generates an error');
         }),
       filterItems: () => [],
-      updateSavedSearch: () => undefined
+      updateSavedSearch: () => undefined,
+      typeOptions: [],
+      modifyMass: () => of(void 0)
     };
   });
 
