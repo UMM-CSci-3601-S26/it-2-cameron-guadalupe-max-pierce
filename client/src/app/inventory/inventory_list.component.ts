@@ -1,4 +1,4 @@
-import { Component, computed, signal, inject } from '@angular/core';
+import { Component, computed, signal, inject, ViewChild, AfterViewInit, effect } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -20,7 +20,7 @@ import { InventoryService } from './inventory.service';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
-import { MatTable, MatTableModule, MatTableDataSource } from '@angular/material/table';
+import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 
 /**
@@ -47,8 +47,8 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
     MatAutocompleteModule,
     MatOptionModule,
     MatRadioModule,
-    // MatTableModule,
-    //InventoryCardComponent,
+    MatTableModule,
+    MatSortModule,
     MatListModule,
     RouterLink,
     MatButtonModule,
@@ -56,23 +56,36 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
     MatIconModule
   ],
 })
-export class InventoryListComponent {
+export class InventoryListComponent implements AfterViewInit {
   private inventoryService = inject(InventoryService);
   // snackBar the `MatSnackBar` used to display feedback
   private snackBar = inject(MatSnackBar);
 
-  private _liveAnnouncer = inject(LiveAnnouncer):
+  private liveAnnouncer = inject(LiveAnnouncer);
 
-    displayedColumns: string[] = ['name', 'type', 'desc', 'location', 'stocked'];
-    dataSource = new MatTableDataSource<InventoryItem>([]);
+  @ViewChild(MatSort) sort!: MatSort;
 
-    announceSortChange(sortState: Sort) {
-      if (sortState.direction) {
-        this._liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
-      } else {
-        this._liveAnnouncer.announce('Sorting cleared');
-      }
+  displayedColumns: string[] = ['name', 'type', 'desc', 'location', 'stocked'];
+  dataSource = new MatTableDataSource<InventoryItem>([]);
+  viewMode = signal<'list' | 'grid'>('list');
+
+  constructor() {
+    effect(() => {
+      this.dataSource.data = this.filteredItems() ?? [];
+    });
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.sort = this.sort;
+  }
+
+  announceSortChange(sortState: Sort) {
+    if (sortState.direction) {
+      this.liveAnnouncer.announce(`Sorted ${sortState.direction}ending`);
+    } else {
+      this.liveAnnouncer.announce('Sorting cleared');
     }
+  }
 
   //dataSource = new MatTableDataSource<InventoryItem>([]);
   itemName = signal<string|undefined>(this.inventoryService.savedInventoryName);
@@ -121,7 +134,7 @@ export class InventoryListComponent {
               `Problem contacting the server – Error Code: ${err.status}\nMessage: ${err.message}`
             );
           }
-          this.snackBar.open(this.errMsg(), 'OK', { duration: 6000 });
+          this.snackBar.open(this.errMsg() ?? 'Unknown error', 'OK', { duration: 6000 });
           return of<InventoryItem[]>([]);
         }),
         tap(() => {
@@ -135,14 +148,14 @@ export class InventoryListComponent {
     //Whenever we sort, we also update saved search.
     //Since this is through service, should be saved between pages.
     this.inventoryService.updateSavedSearch({
-      name: this.itemName(),
-      stocked: this.itemStock(),
-      desc: this.itemDesc(),
-      location: this.itemLocation(),
-      type: this.itemType(),
-      sortby: this.sortBy()
+      name: this.itemName() ?? '',
+      stocked: this.itemStock() ?? 0,
+      desc: this.itemDesc() ?? '',
+      location: this.itemLocation() ?? '',
+      type: this.itemType() ?? '',
+      sortby: this.sortBy() ?? ''
     });
-    return this.inventoryService.filterItems(currentItems, {
+    return this.inventoryService.filterItems(currentItems ?? [], {
       name: this.itemName(),
       type: this.itemType(),
       stocked: this.itemStock(),
@@ -154,7 +167,7 @@ export class InventoryListComponent {
   });
 
   typeFilteredItems = computed(() => {
-    const currentItems = this.serverFilteredItems();
+    const currentItems = this.serverFilteredItems() ?? [];
     const typedArray: { header: string, items: InventoryItem[] }[] = [];
     let matchingItems = [];
     for (let i = 0; i < this.inventoryService.typeOptions.length; i++) {
@@ -192,7 +205,7 @@ export class InventoryListComponent {
   resetLocations() {
     const tempItem: InventoryItem = {
       _id:undefined,
-      location:"N/A",
+      location:'N/A',
       stocked:undefined,
       name:undefined,
       type:undefined,
