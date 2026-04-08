@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,11 +9,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { FamilyService } from './family.service';
-import { switchMap } from 'rxjs/internal/operators/switchMap';
-import { combineLatest } from 'rxjs/internal/observable/combineLatest';
 import { catchError } from 'rxjs/internal/operators/catchError';
+import { of } from 'rxjs';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { of, tap } from 'rxjs';
 import { School } from '../grade_list/school';
 
 export interface Student {
@@ -29,36 +27,6 @@ export interface Family {
   email: string;
   students: Student[];
 }
-
-  private schoolInput$ = toObservable(this.schoolInput);
-
-  serverFilteredSchools =
-    toSignal(
-      //Not actually doing any filtering on the server, just need to get Items.
-      combineLatest([this.schoolInput$]).pipe(
-        switchMap(() =>
-          this.gradeService.getSchools()
-        ),
-        catchError((err) => {
-          if (!(err.error instanceof ErrorEvent)) {
-            this.errMsg.set(
-              `Problem contacting the server – Error Code: ${err.status}\nMessage: ${err.message}`
-            );
-          }
-          this.snackBar.open(this.errMsg(), 'OK', { duration: 6000 });
-          return of<School[]>([]);
-        }),
-        tap(() => {
-        })
-      )
-    );
-
-  filteredSchoolOptions = computed(() => {
-    return this.serverFilteredSchools();
-    // const input = (this.schoolInput() || '').toLowerCase();
-    // if (!input) return this.serverFilteredSchools();
-    // return this.serverFilteredSchools(); //No filtering, short list.
-  });
 
 
 @Component({
@@ -80,9 +48,36 @@ export class AddFamilySurveyComponent {
   private familyService = inject(FamilyService);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
+  private schoolInput = signal('');
+  private schoolInput$ = toObservable(this.schoolInput);
+
+  errMsg = signal('');
 
   surveyFamilyLastName = '';
   surveyParentEmail = '';
+
+
+  serverFilteredSchools = toSignal(
+    this.familyService.getSchools().pipe(
+      catchError((err) => {
+        if (!(err.error instanceof ErrorEvent)) {
+          this.errMsg.set(
+            `Problem contacting the server – Error Code: ${err.status}\nMessage: ${err.message}`
+          );
+        }
+        this.snackBar.open(this.errMsg(), 'OK', { duration: 6000 });
+        return of<School[]>([]);
+      })
+    )
+  );
+
+  filteredSchoolOptions = computed(() => {
+    return this.serverFilteredSchools();
+    // const input = (this.schoolInput() || '').toLowerCase();
+    // if (!input) return this.serverFilteredSchools();
+    // return this.serverFilteredSchools(); //No filtering, short list.
+  });
+
 
   surveyChildren: {
     firstName: string;

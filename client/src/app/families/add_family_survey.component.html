@@ -15,10 +15,16 @@
           <mat-form-field class="input-field">
             <input matInput placeholder="Parent Email" [(ngModel)]="surveyParentEmail" name="parentEmail" required email #parentEmail="ngModel">
             <mat-hint>Parent email</mat-hint>
-            <mat-error *ngIf="parentEmail.invalid && (parentEmail.dirty || parentEmail.touched)">
-              <span *ngIf="parentEmail.errors?.required">Parent email is required.</span>
-              <span *ngIf="parentEmail.errors?.email">Enter a valid email address.</span>
+            @if (parentEmail.invalid && (parentEmail.dirty || parentEmail.touched)) {
+            <mat-error>
+              @if (parentEmail.errors?.required) {
+                <span>Parent email is required.</span>
+              }
+              @if (parentEmail.errors?.email) {
+                <span>Enter a valid email address.</span>
+              }
             </mat-error>
+            }
           </mat-form-field>
 
           @for (child of surveyChildren; track child; let i = $index) {
@@ -48,8 +54,8 @@
               > -->
               <mat-select
               placeholder="School"
-              formControlName="school"
-              [(ngModel)]="gradeService.originSchool">
+              [(ngModel)]="child.school"
+              name="school{{i}}">
                 @for (school of filteredSchoolOptions(); track school.label) {
                 <mat-option [value]="school.label">{{school.label}}</mat-option>
                 }
