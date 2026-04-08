@@ -11,7 +11,6 @@ import { Router } from '@angular/router';
 import { FamilyService } from './family.service';
 import { catchError } from 'rxjs/internal/operators/catchError';
 import { of } from 'rxjs';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { School } from '../grade_list/school';
 
 export interface Student {
@@ -49,7 +48,6 @@ export class AddFamilySurveyComponent {
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
   private schoolInput = signal('');
-  private schoolInput$ = toObservable(this.schoolInput);
 
   errMsg = signal('');
 
@@ -57,7 +55,7 @@ export class AddFamilySurveyComponent {
   surveyParentEmail = '';
 
 
-  serverFilteredSchools = toSignal(
+  serverFilteredSchools = signal(
     this.familyService.getSchools().pipe(
       catchError((err) => {
         if (!(err.error instanceof ErrorEvent)) {

@@ -12,9 +12,11 @@ describe('AddFamilySurveyComponent', () => {
   let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
 
   beforeEach(() => {
-    familyServiceSpy = jasmine.createSpyObj('FamilyService', ['addFamily']);
+    familyServiceSpy = jasmine.createSpyObj('FamilyService', ['addFamily', 'getSchools']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+
+    familyServiceSpy.getSchools.and.returnValue(of([]));
 
     TestBed.configureTestingModule({
       imports: [AddFamilySurveyComponent],
@@ -56,6 +58,8 @@ describe('AddFamilySurveyComponent', () => {
   });
 
   it('should show validation error if form incomplete', () => {
+    component.surveyParentEmail = 'test@test.com';
+
     component.submitSurvey();
 
     expect(snackBarSpy.open).toHaveBeenCalledWith(

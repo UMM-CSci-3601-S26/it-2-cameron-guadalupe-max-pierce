@@ -15,14 +15,18 @@ describe('FamilyService', () => {
       "time":"12:00pm",
       "students":[
         {
-          "grade":"P",
-          "school":"MAES",
-          "backpack":true
+          "grade": "P",
+          "school": "MAES",
+          "backpack": true,
+          firstName: '',
+          lastName: ''
         },
         {
-          "grade":"3",
-          "school":"MAES",
-          "backpack":false
+          "grade": "3",
+          "school": "MAES",
+          "backpack": false,
+          firstName: '',
+          lastName: ''
         }
       ]
     },
@@ -32,9 +36,11 @@ describe('FamilyService', () => {
       "time":"1:00pm",
       "students":[
         {
-          "grade":"2",
-          "school":"Hancock",
-          "backpack":false
+          "grade": "2",
+          "school": "Hancock",
+          "backpack": false,
+          firstName: '',
+          lastName: ''
         }
       ]
     },
@@ -44,19 +50,25 @@ describe('FamilyService', () => {
       "time":"9:00am",
       "students":[
         {
-          "grade":"P",
-          "school":"MAES",
-          "backpack":false
+          "grade": "P",
+          "school": "MAES",
+          "backpack": false,
+          firstName: '',
+          lastName: ''
         },
         {
-          "grade":"6",
-          "school":"MAES",
-          "backpack":true
+          "grade": "6",
+          "school": "MAES",
+          "backpack": true,
+          firstName: '',
+          lastName: ''
         },
         {
-          "grade":"10",
-          "school":"MAES",
-          "backpack":false
+          "grade": "10",
+          "school": "MAES",
+          "backpack": false,
+          firstName: '',
+          lastName: ''
         }
       ]
     }
