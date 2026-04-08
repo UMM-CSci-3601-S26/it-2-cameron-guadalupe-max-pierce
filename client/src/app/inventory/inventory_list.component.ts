@@ -2,6 +2,7 @@ import { Component, computed, signal, inject, ViewChild, AfterViewInit, effect }
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatOptionModule } from '@angular/material/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,6 +23,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSort, Sort, MatSortModule } from '@angular/material/sort';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { LiveAnnouncer } from '@angular/cdk/a11y';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatCheckboxChange } from '@angular/material/checkbox';
 
 /**
  * A component that displays a list of users, either as a grid
@@ -40,6 +43,7 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
   providers: [],
   imports: [
     MatCardModule,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
     FormsModule,
@@ -49,6 +53,9 @@ import { LiveAnnouncer } from '@angular/cdk/a11y';
     MatRadioModule,
     MatTableModule,
     MatSortModule,
+    MatToolbar,
+    // MatTableModule,
+    //InventoryCardComponent,
     MatListModule,
     RouterLink,
     MatButtonModule,
@@ -95,6 +102,7 @@ export class InventoryListComponent implements AfterViewInit {
   itemType = signal<string|undefined>(this.inventoryService.savedInventoryType);
   sortBy = signal<string|undefined>(this.inventoryService.savedInventorySortBy);
   resetVisible = signal<boolean|undefined>(false);//Reset button is initially hidden.
+  private refreshToken = signal(0);
 
   filteredTypeOptions = computed(() => {
     const input = (this.itemType() || '').toLowerCase();
@@ -120,11 +128,12 @@ export class InventoryListComponent implements AfterViewInit {
   private itemDesc$ = toObservable(this.itemDesc);
   private itemLocation$ = toObservable(this.itemLocation);
   private itemType$ = toObservable(this.itemType);
+  private refreshToken$ = toObservable(this.refreshToken);
 
   serverFilteredItems =
     toSignal(
       //Not actually doing any filtering on the server, just need to get Items.
-      combineLatest([this.itemName$,this.itemStock$,this.itemDesc$,this.itemLocation$,this.itemType$]).pipe(
+      combineLatest([this.itemName$,this.itemStock$,this.itemDesc$,this.itemLocation$,this.itemType$,this.refreshToken$]).pipe(
         switchMap(() =>
           this.inventoryService.getItems({}) //If we decide to filter on server, args go her
         ),
@@ -209,18 +218,95 @@ export class InventoryListComponent implements AfterViewInit {
       stocked:undefined,
       name:undefined,
       type:undefined,
-      desc:undefined
+      desc:undefined,
+      pack:undefined,
     }
-    this.inventoryService.modifyMass(tempItem,this.filteredItems());
-    //TODO, We need to update something, such that the page doesn't need manual reloading...
-    this.snackBar.open(
-      `Locations reset. Please reload this page to see your changes. `,
-      'OK',
-      { duration: 6000 }
-    );
+    this.inventoryService.modifyMass(tempItem,this.filteredItems()).subscribe({
+      complete: () => {
+        this.refreshToken.update(value => value + 1);
+        this.snackBar.open(
+          `Locations reset.`,
+          'OK',
+          { duration: 6000 }
+        );
+      }
+    });
   }
 
+  selectedItems = signal(new Set<string>());
 
+  selectionToggle(id: string, event: MatCheckboxChange) {
+    const updated = new Set(this.selectedItems());
+    if (event.checked) {
+      updated.add(id);
+    } else {
+      updated.delete(id);
+    }
+    this.selectedItems.set(updated);
+  }
+
+  isSelected(id: string): boolean {
+    return this.selectedItems().has(id);
+  }
+
+  relocateSelected() {
+    const newLocation = prompt("Enter new location for selected items:");
+    if (newLocation !== null) {
+      const tempItem: InventoryItem = { _id:undefined, location:newLocation, stocked:undefined, name:undefined, type:undefined, desc:undefined, pack:undefined };
+      this.inventoryService.modifyMass(tempItem, this.filteredItems().filter(item => this.selectedItems().has(item._id))).subscribe({
+        complete: () => {
+          this.selectedItems.set(new Set());
+          this.refreshToken.update(value => value + 1);
+          this.snackBar.open(
+            `Selected items updated.`,
+            'OK',
+            { duration: 6000 }
+          );
+        }
+      });
+    }
+  }
+
+  resetInventory() {
+    const warning = confirm("This will delete ALL items. Are you sure?");
+    if (warning == true) {
+      this.inventoryService.deleteAll(this.filteredItems());
+      this.snackBar.open(
+        `Inventory reset. Please wait for page to reload...`,
+        'OK',
+        { duration: 6000 }
+      );
+      this.inventoryService.reloadPage();
+    }
+  }
+
+  adjustStock(item: InventoryItem, delta: number) {
+    const newStocked = (item.stocked ?? 0) + delta;
+    let updatedItem: Partial<InventoryItem>;
+
+    if (newStocked < 0) {
+      updatedItem = {
+        ...item,
+        stocked: 0
+      };
+    } else {
+      updatedItem = {
+        ...item,
+        stocked: newStocked
+      };
+    }
+
+    this.inventoryService.updateItem(updatedItem).subscribe(() => {
+      this.refreshToken.update(value => value + 1);
+    });
+  }
+
+  handleStockButtonClick(event: MouseEvent, item: InventoryItem, delta: number) {
+    // Buttons are nested inside a router link; block the link navigation.
+    event.preventDefault();
+    event.stopPropagation();
+    this.adjustStock(item, delta);
+  }
 
 }
 

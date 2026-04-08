@@ -7,21 +7,21 @@ import { ActivatedRoute } from '@angular/router'; //ParamMap
 import { ActivatedRouteStub } from '../../testing/activated-route-stub'; //No idea wtf this does
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { throwError } from 'rxjs'; //of, throwError
-import { MockInventoryService } from 'src/testing/inventory.service.mock';
-import { ModifyItemComponent } from './modify_inventory_item.component';
+import { MockGradeListService } from 'src/testing/grade_list.service.mock';
+import { ModifyRequirementComponent } from './modify_grade_list_item.component';
 //import { UserProfileComponent } from './user-profile.component';
-import { InventoryService } from './inventory.service';
+import { GradeListService } from './grade_list.service';
 import { provideHttpClient } from '@angular/common/http';
-import { InventoryItem } from './inventory_item';
+import { RequiredItem } from './required_item';
 //import { toSignal } from '@angular/core/rxjs-interop';
 //import { catchError, map, switchMap } from 'rxjs/operators';
-//import { InventoryItemProfileComponent } from './inventory_item_profile.component';
+//import { RequiredItemProfileComponent } from './inventory_item_profile.component';
 
-describe('ModifyItemComponent', () => {
-  let modifyItemComponent: ModifyItemComponent;
+describe('ModifyRequirementComponent', () => {
+  let modifyItemComponent: ModifyRequirementComponent;
   let modifyItemForm: FormGroup;
-  //let inventoryService: InventoryService;
-  let fixture: ComponentFixture<ModifyItemComponent>;
+  //let inventoryService: GradeListService;
+  let fixture: ComponentFixture<ModifyRequirementComponent>;
   //let location: Location;
   const pencilId = 'pencil_id';
   const activatedRoute: ActivatedRouteStub = new ActivatedRouteStub({
@@ -33,13 +33,13 @@ describe('ModifyItemComponent', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        ModifyItemComponent,
+        ModifyRequirementComponent,
         MatSnackBarModule
       ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: InventoryService, useClass: MockInventoryService },
+        { provide: GradeListService, useClass: MockGradeListService },
         { provide: ActivatedRoute, useValue: activatedRoute }
         //For some reason necessary if ANY button has a router link? What does this even do?!
       ]
@@ -49,16 +49,16 @@ describe('ModifyItemComponent', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ModifyItemComponent);
+    fixture = TestBed.createComponent(ModifyRequirementComponent);
     modifyItemComponent = fixture.componentInstance;
     fixture.detectChanges();
-    modifyItemForm = modifyItemComponent.modifyInventoryForm;
+    modifyItemForm = modifyItemComponent.modifyRequirementForm;
     expect(modifyItemForm).toBeDefined();
     expect(modifyItemForm.controls).toBeDefined();
   });
 
   it('should navigate to a specific item profile', () => {
-    const expectedItem: InventoryItem = MockInventoryService.testItems[0];
+    const expectedItem: RequiredItem = MockGradeListService.testItems[0];
     activatedRoute.setParamMap({ id: expectedItem._id });
     expect(modifyItemComponent.item()).toEqual(expectedItem);
   });
@@ -78,7 +78,7 @@ describe('ModifyItemComponent', () => {
     let nameControl: AbstractControl;
 
     beforeEach(() => {
-      nameControl = modifyItemComponent.modifyInventoryForm.controls.name;
+      nameControl = modifyItemComponent.modifyRequirementForm.controls.name;
     });
 
     it('should not allow empty names', () => {
@@ -110,9 +110,82 @@ describe('ModifyItemComponent', () => {
       expect(nameControl.valid).toBeTruthy();
     });
   });
+
+  describe('The school field', () => {
+    let schoolControl: AbstractControl;
+
+    beforeEach(() => {
+      schoolControl = modifyItemComponent.modifyRequirementForm.controls.school;
+    });
+
+    it('should not allow empty schools', () => {
+      schoolControl.setValue('');
+      expect(schoolControl.valid).toBeFalsy();
+    });
+
+    it('should be fine with "Yellow Pencil"', () => {
+      schoolControl.setValue('Yellow Pencil');
+      expect(schoolControl.valid).toBeTruthy();
+    });
+
+    it('should fail on single character names', () => {
+      schoolControl.setValue('x');
+      expect(schoolControl.valid).toBeFalsy();
+      // Annoyingly, Angular uses lowercase 'l' here
+      // when it's an upper case 'L' in `Validators.minLength(2)`.
+      expect(schoolControl.hasError('minlength')).toBeTruthy();
+    });
+
+    it('should fail on really long names', () => {
+      schoolControl.setValue('x'.repeat(250));
+      expect(schoolControl.valid).toBeFalsy();
+      expect(schoolControl.hasError('maxlength')).toBeTruthy();
+    });
+
+    it('should allow digits in the name', () => {
+      schoolControl.setValue('Yellow Pencils, 16-pack');
+      expect(schoolControl.valid).toBeTruthy();
+    });
+  });
+
+  describe('The grade field', () => {
+    let gradeControl: AbstractControl;
+
+    beforeEach(() => {
+      gradeControl = modifyItemComponent.modifyRequirementForm.controls.grade;
+    });
+
+    it('should not allow empty names', () => {
+      gradeControl.setValue('');
+      expect(gradeControl.valid).toBeFalsy();
+    });
+
+    it('should be fine with "1"', () => {
+      gradeControl.setValue('1');
+      expect(gradeControl.valid).toBeTruthy();
+    });
+
+    it('should be fine with "P"', () => {
+      gradeControl.setValue('P');
+      expect(gradeControl.valid).toBeTruthy();
+    });
+
+    it('should fail on invalid characters', () => {
+      gradeControl.setValue('Z');
+      expect(gradeControl.valid).toBeFalsy();
+      expect(gradeControl.hasError('pattern')).toBeTruthy();
+    });
+
+    it('should fail on out-of-bounds grades', () => {
+      gradeControl.setValue('9'.repeat(250));
+      expect(gradeControl.valid).toBeFalsy();
+      expect(gradeControl.hasError('maxlength')).toBeTruthy();
+    });
+  });
+
   describe('The description field', () => {
     it('should allow empty values', () => {
-      const descControl = modifyItemComponent.modifyInventoryForm.controls.desc;
+      const descControl = modifyItemComponent.modifyRequirementForm.controls.desc;
       descControl.setValue('');
       expect(descControl.valid).toBeTruthy();
     });
@@ -122,10 +195,10 @@ describe('ModifyItemComponent', () => {
     let packControl: AbstractControl;
 
     beforeEach(() => {
-      packControl = modifyItemComponent.modifyInventoryForm.controls.pack;
+      packControl = modifyItemComponent.modifyRequirementForm.controls.pack;
     });
 
-    it('should not allow missing stock', () => {
+    it('should not allow missing pack', () => {
       packControl.setValue('');
       expect(packControl.valid).toBeFalsy();
     });
@@ -155,38 +228,38 @@ describe('ModifyItemComponent', () => {
   });
 
   describe('The stocked field', () => {
-    let stockedControl: AbstractControl;
+    let requiredControl: AbstractControl;
 
     beforeEach(() => {
-      stockedControl = modifyItemComponent.modifyInventoryForm.controls.stocked;
+      requiredControl = modifyItemComponent.modifyRequirementForm.controls.required;
     });
 
     it('should not allow missing stock', () => {
-      stockedControl.setValue('');
-      expect(stockedControl.valid).toBeFalsy();
+      requiredControl.setValue('');
+      expect(requiredControl.valid).toBeFalsy();
     });
 
     it('should be fine with "27"', () => {
-      stockedControl.setValue('27');
-      expect(stockedControl.valid).toBeTruthy();
+      requiredControl.setValue('27');
+      expect(requiredControl.valid).toBeTruthy();
     });
 
     it('should fail on negative stock', () => {
-      stockedControl.setValue('-27');
-      expect(stockedControl.valid).toBeFalsy();
-      expect(stockedControl.hasError('min')).toBeTruthy();
+      requiredControl.setValue('-27');
+      expect(requiredControl.valid).toBeFalsy();
+      expect(requiredControl.hasError('min')).toBeTruthy();
     });
 
     it('should fail on stocks that are too high', () => {
-      stockedControl.setValue(99999999999);
-      expect(stockedControl.valid).toBeFalsy();
-      expect(stockedControl.hasError('max')).toBeTruthy();
+      requiredControl.setValue(99999999999);
+      expect(requiredControl.valid).toBeFalsy();
+      expect(requiredControl.hasError('max')).toBeTruthy();
     });
 
     it('should not allow a stock to contain a decimal point', () => {
-      stockedControl.setValue(27.5);
-      expect(stockedControl.valid).toBeFalsy();
-      expect(stockedControl.hasError('pattern')).toBeTruthy();
+      requiredControl.setValue(27.5);
+      expect(requiredControl.valid).toBeFalsy();
+      expect(requiredControl.hasError('pattern')).toBeTruthy();
     });
   });
 
@@ -202,7 +275,7 @@ describe('ModifyItemComponent', () => {
     let typeControl: AbstractControl;
 
     beforeEach(() => {
-      typeControl = modifyItemComponent.modifyInventoryForm.controls.type;
+      typeControl = modifyItemComponent.modifyRequirementForm.controls.type;
     });
 
     it('should not allow empty values', () => {
@@ -222,31 +295,12 @@ describe('ModifyItemComponent', () => {
       // expect(typeControl.hasError('email')).toBeTruthy();
     });
   });
-
-  describe('The location field', () => {
-    let locationControl: AbstractControl;
-
-    beforeEach(() => {
-      locationControl = modifyItemForm.controls.location;
-    });
-
-    it('should not allow empty values', () => {
-      locationControl.setValue('');
-      expect(locationControl.valid).toBeFalsy();
-      expect(locationControl.hasError('required')).toBeTruthy();
-    });
-
-    it('should allow "Over there"', () => {
-      locationControl.setValue('over there');
-      expect(locationControl.valid).toBeTruthy();
-    });
-  });
 });
 
 describe('ModifyComponentNavigation', () => {
-  let component: ModifyItemComponent;
-  let fixture: ComponentFixture<ModifyItemComponent>;
-  let inventoryService: InventoryService;
+  let component: ModifyRequirementComponent;
+  let fixture: ComponentFixture<ModifyRequirementComponent>;
+  let inventoryService: GradeListService;
   let location: Location;
   const pencilId = 'pencil_id';
   const activatedRoute: ActivatedRouteStub = new ActivatedRouteStub({
@@ -258,20 +312,20 @@ describe('ModifyComponentNavigation', () => {
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
-        ModifyItemComponent,
+        ModifyRequirementComponent,
       ],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: InventoryService, useClass: MockInventoryService },
+        { provide: GradeListService, useClass: MockGradeListService },
         { provide: ActivatedRoute, useValue: activatedRoute },
       ],
     }).compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(ModifyItemComponent);
-    inventoryService = TestBed.inject(InventoryService);
+    fixture = TestBed.createComponent(ModifyRequirementComponent);
+    inventoryService = TestBed.inject(GradeListService);
     location = TestBed.inject(Location);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -282,7 +336,7 @@ describe('ModifyComponentNavigation', () => {
   });
 
   it('should navigate to a specific item', () => {
-    const expectedItem: InventoryItem = MockInventoryService.testItems[0];
+    const expectedItem: RequiredItem = MockGradeListService.testItems[0];
     // Setting this should cause anyone subscribing to the paramMap
     // to update. Our `UserProfileComponent` subscribes to that, so
     // it should update right away.
@@ -291,7 +345,7 @@ describe('ModifyComponentNavigation', () => {
   });
 
   it('should navigate to correct item when the id parameter changes', () => {
-    let expectedItem: InventoryItem = MockInventoryService.testItems[0];
+    let expectedItem: RequiredItem = MockGradeListService.testItems[0];
     // Setting this should cause anyone subscribing to the paramMap
     // to update. Our `UserProfileComponent` subscribes to that, so
     // it should update right away.
@@ -299,7 +353,7 @@ describe('ModifyComponentNavigation', () => {
     expect(component.item()).toEqual(expectedItem);
 
     // Changing the paramMap should update the displayed user profile.
-    expectedItem = MockInventoryService.testItems[1];
+    expectedItem = MockGradeListService.testItems[1];
     activatedRoute.setParamMap({ id: expectedItem._id });
     expect(component.item()).toEqual(expectedItem);
   });
@@ -328,23 +382,25 @@ describe('ModifyComponentNavigation', () => {
   });
 
   it('should correctly reset the form', () => {
-    const expectedItem: InventoryItem = MockInventoryService.testItems[0];
+    const expectedItem: RequiredItem = MockGradeListService.testItems[0];
     // Setting this should cause anyone subscribing to the paramMap
     // to update. Our `UserProfileComponent` subscribes to that, so
     // it should update right away.
     activatedRoute.setParamMap({ id: expectedItem._id });
-    component.modifyInventoryForm.controls.name.setValue('Reset this');
-    component.modifyInventoryForm.controls.stocked.setValue(2);
-    component.modifyInventoryForm.controls.location.setValue('Reset this');
-    component.modifyInventoryForm.controls.desc.setValue('Reset this!');
-    component.modifyInventoryForm.controls.type.setValue('erasers');
+    component.modifyRequirementForm.controls.name.setValue('Reset this');
+    component.modifyRequirementForm.controls.required.setValue(2);
+    component.modifyRequirementForm.controls.grade.setValue('1');
+    component.modifyRequirementForm.controls.school.setValue('Nope');
+    component.modifyRequirementForm.controls.desc.setValue('Reset this!');
+    component.modifyRequirementForm.controls.type.setValue('erasers');
 
     component.resetForm();
-    expect(component.modifyInventoryForm.controls.name.value).toBe(component.item().name);
-    expect(component.modifyInventoryForm.controls.stocked.value).toBe(component.item().stocked);
-    expect(component.modifyInventoryForm.controls.location.value).toBe(component.item().location);
-    expect(component.modifyInventoryForm.controls.desc.value).toBe(component.item().desc);
-    expect(component.modifyInventoryForm.controls.type.value).toBe(component.item().type);
+    expect(component.modifyRequirementForm.controls.name.value).toBe(component.item().name);
+    expect(component.modifyRequirementForm.controls.required.value).toBe(component.item().required);
+    expect(component.modifyRequirementForm.controls.grade.value).toBe(component.item().grade);
+    expect(component.modifyRequirementForm.controls.school.value).toBe(component.item().school);
+    expect(component.modifyRequirementForm.controls.desc.value).toBe(component.item().desc);
+    expect(component.modifyRequirementForm.controls.type.value).toBe(component.item().type);
 
   });
 
@@ -356,7 +412,7 @@ describe('ModifyComponentNavigation', () => {
   //   component.submitForm();
   //   // Check that `.addItem()` was called with the form's values which we set
   //   // up above.
-  //   expect(addItemSpy).toHaveBeenCalledWith(component.modifyInventoryForm.value);
+  //   expect(addItemSpy).toHaveBeenCalledWith(component.modifyRequirementForm.value);
   //   // Wait for the router to navigate to the new page. This is necessary since
   //   // navigation is an asynchronous operation.
   //   tick();
@@ -382,7 +438,7 @@ describe('ModifyComponentNavigation', () => {
     component.submitForm();
     // Check that `.addItem()` was called with the form's values which we set
     // up above.
-    expect(addItemSpy).toHaveBeenCalledWith(component.modifyInventoryForm.value);
+    expect(addItemSpy).toHaveBeenCalledWith(component.modifyRequirementForm.value);
     // Confirm that we're still at the same path.
     expect(location.path()).toBe(path);
   });
@@ -394,7 +450,7 @@ describe('ModifyComponentNavigation', () => {
       .and
       .returnValue(throwError(() => errorResponse));
     component.submitForm();
-    expect(addItemSpy).toHaveBeenCalledWith(component.modifyInventoryForm.value);
+    expect(addItemSpy).toHaveBeenCalledWith(component.modifyRequirementForm.value);
     expect(location.path()).toBe(path);
   });
 
@@ -405,7 +461,7 @@ describe('ModifyComponentNavigation', () => {
       .and
       .returnValue(throwError(() => errorResponse));
     component.submitForm();
-    expect(addItemSpy).toHaveBeenCalledWith(component.modifyInventoryForm.value);
+    expect(addItemSpy).toHaveBeenCalledWith(component.modifyRequirementForm.value);
     expect(location.path()).toBe(path);
   });
 

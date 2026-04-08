@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { MockInventoryService } from 'src/testing/inventory.service.mock';
 import { InventoryListComponent } from './inventory_list.component';
 import { InventoryItem } from './inventory_item';
@@ -95,7 +95,8 @@ describe('Inventory list', () => {
         stocked:undefined,
         name:undefined,
         type:undefined,
-        desc:undefined
+        desc:undefined,
+        pack:undefined
       },
       originalItems
     );
@@ -130,6 +131,82 @@ describe('Inventory list', () => {
   it('displayTypeLabel returns the value itself when no match is found', () => {
     const label = inventoryList.displayTypeLabel('nonexistent_type');
     expect(label).toBe('nonexistent_type');
+  it('gets items after location reset completes', () => {
+    const getItemsSpy = spyOn(inventoryService, 'getItems').and.callThrough();
+    spyOn(inventoryService, 'modifyMass').and.returnValue(of(void 0));
+
+    const callsBeforeReset = getItemsSpy.calls.count();
+    inventoryList.resetLocations();
+    fixture.detectChanges();
+
+    expect(getItemsSpy.calls.count()).toBeGreaterThan(callsBeforeReset);
+  });
+
+  it('does not relocate when prompt is cancelled', () => {
+    spyOn(window, 'prompt').and.returnValue(null);
+    const modifySpy = spyOn(inventoryService, 'modifyMass').and.returnValue(of(void 0));
+
+    inventoryList.relocateSelected();
+
+    expect(modifySpy).not.toHaveBeenCalled();
+  });
+
+  it('relocates selected items and clears selection on completion', () => {
+    spyOn(inventoryService, 'filterItems').and.callFake((items) => items);
+    inventoryList.itemName.set('pencil');
+    fixture.detectChanges();
+    const selectedId = inventoryList.filteredItems()[0]._id;
+    inventoryList.selectedItems.set(new Set([selectedId]));
+    spyOn(window, 'prompt').and.returnValue('Shelf A');
+    const modifySpy = spyOn(inventoryService, 'modifyMass').and.returnValue(of(void 0));
+
+    inventoryList.relocateSelected();
+    fixture.detectChanges();
+
+    expect(modifySpy).toHaveBeenCalled();
+    const modifiedItems = modifySpy.calls.mostRecent().args[1] as InventoryItem[];
+    expect(modifiedItems.length).toBe(1);
+    expect(modifiedItems[0]._id).toBe(selectedId);
+    expect(inventoryList.selectedItems().size).toBe(0);
+  });
+
+  it('increments stock and calls updateItem with incremented value', () => {
+    const updateSpy = spyOn(inventoryService, 'updateItem').and.returnValue(of(void 0));
+    const baseItem = inventoryList.serverFilteredItems()[0];
+
+    inventoryList.adjustStock(baseItem, 1);
+
+    expect(updateSpy).toHaveBeenCalledOnceWith(jasmine.objectContaining({
+      _id: baseItem._id,
+      stocked: baseItem.stocked + 1
+    }));
+  });
+
+  it('clamps decremented stock to zero when decrement is too large', () => {
+    const updateSpy = spyOn(inventoryService, 'updateItem').and.returnValue(of(void 0));
+    const baseItem = { ...inventoryList.serverFilteredItems()[1], stocked: 2 };
+
+    inventoryList.adjustStock(baseItem, -10);
+
+    expect(updateSpy).toHaveBeenCalledOnceWith(jasmine.objectContaining({
+      _id: baseItem._id,
+      stocked: 0
+    }));
+  });
+
+  it('prevents navigation on stock button clicks and delegates to adjustStock', () => {
+    const adjustSpy = spyOn(inventoryList, 'adjustStock');
+    const baseItem = inventoryList.serverFilteredItems()[0];
+    const mockEvent = {
+      preventDefault: jasmine.createSpy('preventDefault'),
+      stopPropagation: jasmine.createSpy('stopPropagation')
+    } as unknown as MouseEvent;
+
+    inventoryList.handleStockButtonClick(mockEvent, baseItem, 5);
+
+    expect((mockEvent.preventDefault as jasmine.Spy)).toHaveBeenCalled();
+    expect((mockEvent.stopPropagation as jasmine.Spy)).toHaveBeenCalled();
+    expect(adjustSpy).toHaveBeenCalledOnceWith(baseItem, 5);
   });
 });
 
@@ -141,6 +218,8 @@ describe('Misbehaving Item List', () => {
     getItems: () => Observable<InventoryItem[]>;
     filterItems: () => InventoryItem[];
     updateSavedSearch: () => undefined;
+    typeOptions: { value: string; label: string }[];
+    modifyMass: () => Observable<void>;
   };
 
   beforeEach(() => {
@@ -151,7 +230,9 @@ describe('Misbehaving Item List', () => {
           observer.error('getItems() Observer generates an error');
         }),
       filterItems: () => [],
-      updateSavedSearch: () => undefined
+      updateSavedSearch: () => undefined,
+      typeOptions: [],
+      modifyMass: () => of(void 0)
     };
   });
 

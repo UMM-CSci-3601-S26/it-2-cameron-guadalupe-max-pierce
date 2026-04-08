@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, forkJoin, of, switchMap } from 'rxjs';
 import { AppComponent } from 'src/app/app.component';
 import { InventoryItem } from '../app/inventory/inventory_item';
 import { InventoryService } from 'src/app/inventory/inventory.service';
@@ -12,7 +12,7 @@ import { InventoryService } from 'src/app/inventory/inventory.service';
 @Injectable({
   providedIn: AppComponent
 })
-export class MockInventoryService implements Pick<InventoryService, 'getItems' | 'filterItems' | 'addItem' | 'deleteItem'| 'updateSavedSearch'| 'modifyMass'> {
+export class MockInventoryService implements Pick<InventoryService, 'getItems' | 'filterItems' | 'addItem' | 'deleteItem'| 'updateSavedSearch'| 'modifyMass' | 'updateItem' | 'deleteAll'> {
   savedInventoryName = ''; //Per-session saved value for name search bar.
   savedInventoryLocation = ''; //Per-session saved value for location search bar.
   savedInventoryStocked = 0; //Per-session saved value for stocked search bar.
@@ -27,7 +27,8 @@ export class MockInventoryService implements Pick<InventoryService, 'getItems' |
       type: 'pencil',
       location: 'Tote #3',
       stocked: 6,
-      desc: 'yellow Ticonderoga pencils'
+      desc: 'yellow Ticonderoga pencils',
+      pack:1
     },
     {
       _id: 'eraser_id',
@@ -35,7 +36,8 @@ export class MockInventoryService implements Pick<InventoryService, 'getItems' |
       type: 'eraser',
       location: 'Tote #4',
       stocked: 2,
-      desc: '2-inch rubber eraser'
+      desc: '2-inch rubber eraser',
+      pack:1
     },
     {
       _id: '1',
@@ -43,7 +45,8 @@ export class MockInventoryService implements Pick<InventoryService, 'getItems' |
       type: 'folder',
       location: 'Tote #2',
       stocked: 0,
-      desc: 'standard size red plastic folder.'
+      desc: 'standard size red plastic folder.',
+      pack:1
     }
   ];
   static emptyItem: InventoryItem = {
@@ -52,7 +55,8 @@ export class MockInventoryService implements Pick<InventoryService, 'getItems' |
     type: '',
     location: '',
     stocked: 0,
-    desc: ''
+    desc: '',
+    pack:1
   }
 
   //Probably terrible form, but best way I could figure to get the tests working.
@@ -108,53 +112,36 @@ export class MockInventoryService implements Pick<InventoryService, 'getItems' |
     return of(MockInventoryService.emptyItem);
   }
 
-  modifyMass(newProps:InventoryItem,oldItems:InventoryItem[]) {
-    //Copied from Inventory Service for testing purposes.
-    const newItems: InventoryItem[] = [];
-    for (let i = 0; i < oldItems.length -1; i ++) {
-      //Location is probably the only one this will be used for, but you never know.
-      //id is never overwritten; necessary to delete and replace.
-      const baseItem: InventoryItem = {
-        _id:undefined,
-        name:undefined,
-        location:undefined,
-        desc:undefined,
-        stocked:undefined,
-        type:undefined
-      }
-      //Create a new array of items, initialized as empty.
-      newItems.push(baseItem);
+  updateItem(updatedItem: Partial<InventoryItem>): Observable<void> {
+    return of(void 0);
+  }
 
-      if (newProps.name != undefined) {
-        newItems[i].name = newProps.name;
-      } else {
-        newItems[i].name = oldItems[i].name;
-      }
+  modifyMass(newProps:InventoryItem,oldItems:InventoryItem[]): Observable<void> {
+    if (oldItems.length === 0) {
+      return of(void 0);
+    }
 
-      if (newProps.stocked != undefined) {
-        newItems[i].stocked = newProps.stocked;
-      } else {
-        newItems[i].stocked = oldItems[i].stocked;
-      }
+    return forkJoin(
+      oldItems.map((oldItem) => {
+        const newItem: Partial<InventoryItem> = {
+          name: newProps.name != undefined ? newProps.name : oldItem.name,
+          location: newProps.location != undefined ? newProps.location : oldItem.location,
+          desc: newProps.desc != undefined ? newProps.desc : oldItem.desc,
+          stocked: newProps.stocked != undefined ? newProps.stocked : oldItem.stocked,
+          type: newProps.type != undefined ? newProps.type : oldItem.type,
+          pack: newProps.pack != undefined ? newProps.pack : oldItem.pack,
+        };
 
-      if (newProps.location != undefined) {
-        newItems[i].location = newProps.location;
-      } else {
-        newItems[i].location = oldItems[i].location;
-      }
+        return this.addItem(newItem).pipe(
+          switchMap(() => this.deleteItem(oldItem._id))
+        );
+      })
+    ).pipe(switchMap(() => of(void 0)));
+  }
 
-      if (newProps.desc != undefined) {
-        newItems[i].desc = newProps.desc;
-      } else {
-        newItems[i].desc = oldItems[i].desc;
-      }
-
-      if (newProps.type != undefined) {
-        newItems[i].type = newProps.type;
-      } else {
-        newItems[i].type = oldItems[i].type;
-      }
-      this.addItem(newItems[i]).subscribe(); //Need to subscribe for changes to take effect
+  deleteAll(oldItems:InventoryItem[]) {
+    //Same as inventory items. Not sure when we'd ever need to use this, but it's here.
+    for (let i = 0; i < oldItems.length; i ++) {
       this.deleteItem(oldItems[i]._id).subscribe();
     }
   }

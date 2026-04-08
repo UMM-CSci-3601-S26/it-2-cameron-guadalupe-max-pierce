@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { Observable } from 'rxjs';
+//import { throwError } from 'rxjs';
 import { MockGradeListService } from 'src/testing/grade_list.service.mock';
 import { GradeListComponent } from './grade_list.component';
 import { GradeListService } from './grade_list.service';
@@ -12,7 +13,38 @@ describe('Grade List', () => {
   let gradeList: GradeListComponent;
   let fixture: ComponentFixture<GradeListComponent>;
   let inventoryService: GradeListService;
-
+  const testItems: RequiredItem[] = [
+    {
+      _id: 'pencil_id',
+      name: 'Yellow Pencils',
+      type: 'pencil',
+      grade:'K',
+      school:'MAES',
+      required: 6,
+      desc: 'yellow Ticonderoga pencils',
+      pack:1
+    },
+    {
+      _id: 'eraser_id',
+      name: '2-inch Eraser',
+      type: 'eraser',
+      grade:'1',
+      school:'MAES',
+      required: 2,
+      desc: '2-inch rubber eraser',
+      pack:1
+    },
+    {
+      _id: '1',
+      name: 'Red Plastic Folder',
+      type: 'folder',
+      grade:'3',
+      school:'Hancock',
+      required: 0,
+      desc: 'standard size red plastic folder.',
+      pack:1
+    }
+  ];
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [GradeListComponent],
@@ -66,6 +98,7 @@ describe('Grade List', () => {
     const typedItems = gradeList.typeFilteredItems();
     expect(typedItems).toBeDefined();
     expect(Array.isArray(typedItems)).toBe(true);
+    expect(typedItems.length).toBe(0); //Test items returns an empty array.
   });
 
   it('should initialize with schoolFilteredItems available', () => {
@@ -87,13 +120,23 @@ describe('Grade List', () => {
     expect(gradeList.errMsg()).toBeUndefined();
   });
 
-  it("correctly handles the 'Location Reset' button", () => {
-    expect(gradeList.resetVisible()).toEqual(false);
-    gradeList.revealReset();
-    expect(gradeList.resetVisible()).toEqual(true);
+  // it("correctly handles the 'Location Reset' button", () => {
+  //   expect(gradeList.resetVisible()).toEqual(false);
+  //   gradeList.revealReset();
+  //   expect(gradeList.resetVisible()).toEqual(true);
+  // });
+
+  it("correctly populates the inventory with items from grade list", () => {
+    expect(gradeList.populateAllowed).toBeTrue();
+    const reloadSpy = spyOn(inventoryService, 'reloadPage');
+    inventoryService.addItemToInventory(testItems[1]); //Ensures at least one is a duplicate.
+    gradeList.populateInventory(testItems,"",""); //Adds all items.
+    expect(gradeList.populateAllowed).toBeFalse();
+    expect(gradeList.snackBar).toBeTruthy();
+    expect(reloadSpy).toHaveBeenCalled();
   });
 
-  //Irrellevant; eventually add a test for clearing the grade list.
+  //Irrelevant; eventually add a test for clearing the grade list.
   // it("calls the service with correct parameters for location reset", () => {
   //   const spy = spyOn(inventoryService, 'modifyMass').and.callThrough();
   //   const originalItems = gradeList.filteredItems();

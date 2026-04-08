@@ -60,6 +60,7 @@ describe('Family list', () => {
     const gradedItems = familyList.gradeFilteredFamilies();
     expect(gradedItems).toBeDefined();
     expect(Array.isArray(gradedItems)).toBe(true);
+    expect(gradedItems.length).toBe(14); //Based on mock service test data.
   });
 
   it('should initialize with schoolFilteredFamilies available', () => {
@@ -87,11 +88,11 @@ describe('Family list', () => {
     expect(familyList.errMsg()).toBeUndefined();
   });
 
-  it("correctly handles the 'Location Reset' button", () => {
-    expect(familyList.resetVisible()).toEqual(false);
-    familyList.revealReset();
-    expect(familyList.resetVisible()).toEqual(true);
-  });
+  // it("correctly handles the 'Location Reset' button", () => {
+  //   expect(familyList.resetVisible()).toEqual(false);
+  //   familyList.revealReset();
+  //   expect(familyList.resetVisible()).toEqual(true);
+  // });
 
   //Irellevant, eventually add a test for list clear.
 

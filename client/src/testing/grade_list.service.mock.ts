@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { AppComponent } from 'src/app/app.component';
 import { RequiredItem } from '../app/grade_list/required_item';
+import { InventoryItem } from '../app/inventory/inventory_item';
 import { School } from '../app/grade_list/school';
 import { GradeListService } from 'src/app/grade_list/grade_list.service';
 
@@ -13,7 +14,7 @@ import { GradeListService } from 'src/app/grade_list/grade_list.service';
 @Injectable({
   providedIn: AppComponent
 })
-export class MockGradeListService implements Pick<GradeListService, 'getItems' | 'filterItems' | 'addItem' | 'deleteItem'| 'updateSavedSearch'| 'modifyMass'|'getSchools'> {
+export class MockGradeListService implements Pick<GradeListService, 'getItems' | 'filterItems' | 'addItem' | 'addItemToInventory' | 'deleteItem'| 'updateSavedSearch'| 'modifyMass'|'getSchools'|'reloadPage'|'alreadyInInventory'|'deleteAll'> {
   savedInventoryName = ''; //Per-session saved value for name search bar.
   savedInventoryGrade = ''; //Per-session saved value for location search bar.
   savedInventorySchool = ''; //Per-session saved value for location search bar.
@@ -48,7 +49,8 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
       grade:'K',
       school:'MAES',
       required: 6,
-      desc: 'yellow Ticonderoga pencils'
+      desc: 'yellow Ticonderoga pencils',
+      pack:1
     },
     {
       _id: 'eraser_id',
@@ -57,7 +59,8 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
       grade:'1',
       school:'MAES',
       required: 2,
-      desc: '2-inch rubber eraser'
+      desc: '2-inch rubber eraser',
+      pack:1
     },
     {
       _id: '1',
@@ -66,7 +69,8 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
       grade:'3',
       school:'Hancock',
       required: 0,
-      desc: 'standard size red plastic folder.'
+      desc: 'standard size red plastic folder.',
+      pack:1
     }
   ];
   static emptyItem: RequiredItem = {
@@ -76,7 +80,8 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
     grade: '',
     school: '',
     required: 0,
-    desc: ''
+    desc: '',
+    pack:1
   }
 
   //Probably terrible form, but best way I could figure to get the tests working.
@@ -97,12 +102,30 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
     this.savedInventorySortBy = fields.sortby;
   }
 
+  alreadyInInventory( newItem: RequiredItem, inventory: InventoryItem[]): boolean {
+    if (newItem && inventory) {
+      return false;
+    }
+    return true;
+  }
+
   // skipcq: JS-0105
   // It's OK that the `_filters` argument isn't used here, so we'll disable
   // this warning for just his function.
   /* eslint-disable @typescript-eslint/no-unused-vars */
   getItems(_filters: { name?: string; stocked?: number; desc?: string; location?: string; type?: string;}): Observable<RequiredItem[]> {
     return of(MockGradeListService.testItems);
+  }
+
+  deleteAll(oldItems:RequiredItem[]) {
+    //Same as inventory items. Not sure when we'd ever need to use this, but it's here.
+    for (let i = 0; i < oldItems.length; i ++) {
+      this.deleteItem(oldItems[i]._id).subscribe();
+    }
+  }
+
+  reloadPage() {
+    //Do nothing!
   }
 
   getSchools(): Observable<School[]> {
@@ -132,6 +155,12 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
     return of('');
   }
 
+  addItemToInventory(item: Partial<InventoryItem>): Observable<string> {
+    // Send post request to add a new item with the item data as the body.
+    // `res.id` should be the MongoDB ID of the newly added `Item`.
+    return of('');
+  }
+
   deleteItem(id: string): Observable<RequiredItem> {
     // Send post request to add a new item with the item data as the body.
     // `res.id` should be the MongoDB ID of the newly added `Item`.
@@ -150,7 +179,8 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
         school:undefined,
         desc:undefined,
         required:undefined,
-        type:undefined
+        type:undefined,
+        pack:undefined
       }
       //Create a new array of items, initialized as empty.
       newItems.push(baseItem);
@@ -165,6 +195,12 @@ export class MockGradeListService implements Pick<GradeListService, 'getItems' |
         newItems[i].required = newProps.required;
       } else {
         newItems[i].required = oldItems[i].required;
+      }
+
+      if (newProps.pack != undefined) {
+        newItems[i].pack = newProps.pack;
+      } else {
+        newItems[i].pack = oldItems[i].pack;
       }
 
       if (newProps.grade != undefined) {

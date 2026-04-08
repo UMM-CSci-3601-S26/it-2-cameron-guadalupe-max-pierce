@@ -15,7 +15,7 @@ import { FamilyService } from 'src/app/families/family.service';
 })
 
 //'modifyMass'
-export class MockFamilyService implements Pick<FamilyService, 'getFamilies' | 'filterFamilies' | 'addFamily' | 'deleteFamily'| 'updateSavedSearch'|'getSchools'> {
+export class MockFamilyService implements Pick<FamilyService, 'getFamilies' | 'filterFamilies' | 'addFamily' | 'deleteFamily'| 'updateSavedSearch'|'getSchools' | 'deleteAll'> {
   savedFamilyName = ''; //Per-session saved value for name search bar.
   savedFamilySchool = '';
   savedFamilyGrade = '';
@@ -159,6 +159,13 @@ export class MockFamilyService implements Pick<FamilyService, 'getFamilies' | 'f
     return of(MockFamilyService.emptyFamily);
   }
 
+  deleteAll(oldItems:Family[]) {
+    //Same as inventory items. Not sure when we'd ever need to use this, but it's here.
+    for (let i = 0; i < oldItems.length; i ++) {
+      this.deleteFamily(oldItems[i]._id).subscribe();
+    }
+  }
+
   // modifyMass(newProps:Family,oldItems:Family[]) {
   //   //Doesn't return anything; just modifies database.
   // }
@@ -170,6 +177,6 @@ export class MockFamilyService implements Pick<FamilyService, 'getFamilies' | 'f
     location?: string;
     type?: string;
   }): Family[] {
-    return []
+    return MockFamilyService.testItems;
   }
 }

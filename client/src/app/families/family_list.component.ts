@@ -11,6 +11,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { RouterLink } from '@angular/router';
 import { catchError, combineLatest, of, switchMap, tap } from 'rxjs';
 import { Family } from './family';
@@ -20,6 +21,7 @@ import { School } from '../grade_list/school';
 import { FamilyService } from './family.service';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatToolbar } from '@angular/material/toolbar';
 
 /**
  * A component that displays a list of users, either as a grid
@@ -45,6 +47,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
     MatAutocompleteModule,
     MatOptionModule,
     MatRadioModule,
+    MatCheckboxModule,
+    MatToolbar,
     // MatTableModule,
     //InventoryCardComponent,
     MatListModule,
@@ -66,7 +70,8 @@ export class FamilyListComponent {
   itemStudents = signal<number|undefined>(this.familyService.savedFamilyStudents);
   itemTime = signal<string|undefined>(this.familyService.savedFamilyTime);
   sortBy = signal<string|undefined>(this.familyService.savedFamilySortBy); //When undefined, sorts by name.
-  resetVisible = signal<boolean|undefined>(false);//Reset button is initially hidden.
+  //resetVisible = signal<boolean|undefined>(false);//Reset button is initially hidden.
+
 
   filteredGradeOptions = computed(() => {
     return this.familyService.gradeOptions;
@@ -298,13 +303,27 @@ export class FamilyListComponent {
     return schooledArray;
   })
 
-  revealReset() {
-    this.resetVisible.set(true);
-    this.snackBar.open(
-      `Press 'Clear all Families' to proceed. This CANNOT be undone. `,
-      'OK',
-      { duration: 6000 }
-    );
+  // revealReset() {
+  //   this.resetVisible.set(true);
+  //   this.snackBar.open(
+  //     `Press 'Clear all Families' to proceed. This CANNOT be undone. `,
+  //     'OK',
+  //     { duration: 6000 }
+  //   );
+  // }
+
+  //Not a great way to test this since it reloads the page...
+  resetStudents() {
+    const warning = confirm("This will delete ALL families. Are you sure?");
+    if (warning == true) {
+      this.familyService.deleteAll(this.filteredFamilies());
+      this.snackBar.open(
+        `Family List reset. Please wait for page to reload...`,
+        'OK',
+        { duration: 6000 }
+      );
+      this.familyService.reloadPage();
+    }
   }
 
   //Not relevant for families? Will still want a clear all families button.
