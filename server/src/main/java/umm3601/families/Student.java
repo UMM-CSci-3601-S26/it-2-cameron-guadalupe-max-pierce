@@ -12,6 +12,8 @@ public class Student {
   @SuppressWarnings({"MemberName"})
   public String _id;
 
+  public String firstName;
+  public String lastName;
   public boolean backpack; //If true, student also needs a backpack.
   public String grade; //Just need grade, not name.
   public String school;

@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,6 +10,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { FamilyService } from './family.service';
+import { catchError } from 'rxjs/internal/operators/catchError';
+import { of } from 'rxjs';
+import { School } from '../grade_list/school';
 
 export interface Student {
   firstName: string;
@@ -24,10 +28,12 @@ export interface Family {
   students: Student[];
 }
 
+
 @Component({
   selector: 'app-add-family-survey',
   standalone: true,
   imports: [
+    CommonModule,
     FormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -43,9 +49,35 @@ export class AddFamilySurveyComponent {
   private familyService = inject(FamilyService);
   private snackBar = inject(MatSnackBar);
   private router = inject(Router);
+  private schoolInput = signal('');
+
+  errMsg = signal('');
 
   surveyFamilyLastName = '';
   surveyParentEmail = '';
+
+
+  serverFilteredSchools = signal(
+    this.familyService.getSchools().pipe(
+      catchError((err) => {
+        if (!(err.error instanceof ErrorEvent)) {
+          this.errMsg.set(
+            `Problem contacting the server – Error Code: ${err.status}\nMessage: ${err.message}`
+          );
+        }
+        this.snackBar.open(this.errMsg(), 'OK', { duration: 6000 });
+        return of<School[]>([]);
+      })
+    )
+  );
+
+  filteredSchoolOptions = computed(() => {
+    return this.serverFilteredSchools();
+    // const input = (this.schoolInput() || '').toLowerCase();
+    // if (!input) return this.serverFilteredSchools();
+    // return this.serverFilteredSchools(); //No filtering, short list.
+  });
+
 
   surveyChildren: {
     firstName: string;
@@ -81,17 +113,30 @@ export class AddFamilySurveyComponent {
     ];
   }
 
+  private isValidEmail(email: string): boolean {
+    const normalized = email?.trim();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return Boolean(normalized && emailPattern.test(normalized));
+  }
+
   submitSurvey(): void {
     if (
       !this.surveyFamilyLastName ||
       !this.surveyParentEmail ||
+      !this.isValidEmail(this.surveyParentEmail) ||
       this.surveyChildren.some(
         c => !c.firstName || !c.lastName || !c.school || !c.grade
       )
     ) {
-      this.snackBar.open('Please fill in all required fields', 'OK', {
-        duration: 5000
-      });
+      this.snackBar.open(
+        !this.surveyParentEmail || !this.isValidEmail(this.surveyParentEmail)
+          ? 'Please enter a valid parent email address'
+          : 'Please fill in all required fields',
+        'OK',
+        {
+          duration: 5000
+        }
+      );
       return;
     }
 
@@ -122,4 +167,5 @@ export class AddFamilySurveyComponent {
       }
     });
   }
+
 }
